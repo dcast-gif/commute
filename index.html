@@ -139,7 +139,8 @@
     </div>
   </div>
 
-  <button class="check-btn" id="checkBtn" onclick="checkStatus()">Check My Commute Now</button>
+<button class="check-btn" id="checkBtn" onclick="checkStatus()">Check My Commute Now</button>
+<button class="check-btn" style="background:#22c55e; margin-top: 0.6rem;" onclick="testNotification()">🧪 Test Notification</button>
 
   <div id="resultsSection" class="results-section" style="display:none">
     <div class="results-header" id="resultsHeader"></div>
@@ -460,7 +461,28 @@ async function checkStatus(silent = false) {
     if (!silent) { btn.disabled = false; btn.textContent = 'Check My Commute Now'; }
   }
 }
-
+function testNotification() {
+  if (!('Notification' in window)) {
+    alert("Notifications not supported in this browser");
+    return;
+  }
+  
+  if (Notification.permission === 'granted') {
+    new Notification('🧪 Test Notification', {
+      body: 'This is a test from My Commute. If you see this, notifications are working!',
+      icon: 'https://via.placeholder.com/192/7c6af7/ffffff?text=C'
+    });
+    showNotifAlert('✅ Test notification sent!');
+  } else {
+    Notification.requestPermission().then(permission => {
+      if (permission === 'granted') {
+        testNotification(); // try again
+      } else {
+        alert('Notification permission denied. Check iOS Settings > Commute > Notifications');
+      }
+    });
+  }
+}
 load();
 buildLineGrid();
 renderSavedStations();
