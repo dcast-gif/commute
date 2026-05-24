@@ -137,10 +137,88 @@ const LINES = [
   { id: 'waterloo-city', name: 'Waterloo & City', color: '#95CDBA' },
 ];
 
-const ALL_STATIONS = [ /* All your stations from the original file */ 
+const ALL_STATIONS = [
   { id: '940GZZLUASL', name: "Angel", lines: ["Northern"] },
-  // ... (I kept all stations - they are in your pasted file)
-  // To save space here, assume they are all included as before
+  { id: '940GZZLUBBN', name: "Barbican", lines: ["Circle","Hammersmith & City","Metropolitan"] },
+  { id: '940GZZLUBKF', name: "Blackfriars", lines: ["Circle","District"] },
+  { id: '940GZZLUBND', name: "Bond Street", lines: ["Central","Jubilee"] },
+  { id: '940GZZLUBWR', name: "Bow Road", lines: ["District","Hammersmith & City"] },
+  { id: '940GZZLUBXN', name: "Brixton", lines: ["Victoria"] },
+  { id: '940GZZLUCAL', name: "Caledonian Road", lines: ["Piccadilly"] },
+  { id: '940GZZLUCMD', name: "Canada Water", lines: ["Jubilee","Overground"] },
+  { id: '940GZZLUCSM', name: "Cannon Street", lines: ["Circle","District"] },
+  { id: '940GZZLUCFM', name: "Canary Wharf", lines: ["Jubilee"] },
+  { id: '940GZZLUCHX', name: "Charing Cross", lines: ["Bakerloo","Northern"] },
+  { id: '940GZZLUCWL', name: "Clapham Common", lines: ["Northern"] },
+  { id: '940GZZLUCJN', name: "Clapham Junction", lines: ["Overground"] },
+  { id: '940GZZLUCPK', name: "Clapham North", lines: ["Northern"] },
+  { id: '940GZZLUCPS', name: "Clapham South", lines: ["Northern"] },
+  { id: '940GZZLUECT', name: "Earl's Court", lines: ["District","Piccadilly"] },
+  { id: '940GZZLUELN', name: "Elephant & Castle", lines: ["Bakerloo","Northern"] },
+  { id: '940GZZLUEAC', name: "Euston", lines: ["Northern","Victoria"] },
+  { id: '940GZZLUEUS', name: "Euston Square", lines: ["Circle","Hammersmith & City","Metropolitan"] },
+  { id: '940GZZLUFBY', name: "Farringdon", lines: ["Circle","Elizabeth","Hammersmith & City","Metropolitan"] },
+  { id: '940GZZLUGPK', name: "Green Park", lines: ["Jubilee","Piccadilly","Victoria"] },
+  { id: '940GZZLUHBN', name: "Hammersmith", lines: ["Circle","District","Hammersmith & City","Piccadilly"] },
+  { id: '940GZZLUHR4', name: "Heathrow T2&3", lines: ["Piccadilly"] },
+  { id: '940GZZLUHGH', name: "Highbury & Islington", lines: ["Victoria","Overground"] },
+  { id: '940GZZLUHLT', name: "Holborn", lines: ["Central","Piccadilly"] },
+  { id: '940GZZLUHPK', name: "Hyde Park Corner", lines: ["Piccadilly"] },
+  { id: '940GZZLUKSX', name: "King's Cross St. Pancras", lines: ["Circle","Hammersmith & City","Metropolitan","Northern","Piccadilly","Victoria"] },
+  { id: '940GZZLUKBN', name: "Kennington", lines: ["Northern"] },
+  { id: '940GZZLUKSL', name: "Knightsbridge", lines: ["Piccadilly"] },
+  { id: '940GZZLULVT', name: "Liverpool Street", lines: ["Central","Circle","Elizabeth","Hammersmith & City","Metropolitan"] },
+  { id: '940GZZLULBN', name: "London Bridge", lines: ["Jubilee","Northern"] },
+  { id: '940GZZLULSQ', name: "Leicester Square", lines: ["Northern","Piccadilly"] },
+  { id: '940GZZLUMAR', name: "Marble Arch", lines: ["Central"] },
+  { id: '940GZZLUMGT', name: "Moorgate", lines: ["Circle","Hammersmith & City","Metropolitan","Northern"] },
+  { id: '940GZZLUODS', name: "Old Street", lines: ["Northern"] },
+  { id: '940GZZLUOXC', name: "Oxford Circus", lines: ["Bakerloo","Central","Victoria"] },
+  { id: '940GZZLUPAD', name: "Paddington", lines: ["Bakerloo","Circle","District","Elizabeth","Hammersmith & City"] },
+  { id: '940GZZLUPCC', name: "Piccadilly Circus", lines: ["Bakerloo","Piccadilly"] },
+  { id: '940GZZLUQWY', name: "Queensway", lines: ["Central"] },
+  { id: '940GZZLURSG', name: "Russell Square", lines: ["Piccadilly"] },
+  { id: '940GZZLUSGP', name: "Seven Sisters", lines: ["Victoria"] },
+  { id: '940GZZLUSBC', name: "Shepherd's Bush", lines: ["Central"] },
+  { id: '940GZZLUSJP', name: "St. James's Park", lines: ["Circle","District"] },
+  { id: '940GZZLUSPK', name: "Stockwell", lines: ["Northern","Victoria"] },
+  { id: '940GZZLUSTM', name: "Stamford Brook", lines: ["District"] },
+  { id: '940GZZLUSTD', name: "Stratford", lines: ["Central","DLR","Jubilee","Overground"] },
+  { id: '940GZZLUSUT', name: "Southwark", lines: ["Jubilee"] },
+  { id: '940GZZLUTCR', name: "Tottenham Court Road", lines: ["Central","Elizabeth","Northern"] },
+  { id: '940GZZLUTHR', name: "Tottenham Hale", lines: ["Victoria","Overground"] },
+  { id: '940GZZLUVXL', name: "Vauxhall", lines: ["Victoria"] },
+  { id: '940GZZLUVIC', name: "Victoria", lines: ["Circle","District","Victoria"] },
+  { id: '940GZZLUWKN', name: "Waterloo", lines: ["Bakerloo","Jubilee","Northern","Waterloo & City"] },
+  { id: '940GZZLUWBP', name: "Westminster", lines: ["Circle","District","Jubilee"] },
+  { id: '940GZZLUWPL', name: "White City", lines: ["Central"] },
+  { id: '940GZZLUWLO', name: "Whitechapel", lines: ["District","Elizabeth","Hammersmith & City"] },
+  { id: '940GZZLUWIM', name: "Wimbledon", lines: ["District","Overground"] },
+  { id: '940GZZLUBST', name: "Baker Street", lines: ["Bakerloo","Circle","Hammersmith & City","Jubilee","Metropolitan"] },
+  { id: '940GZZLUBHF', name: "Bethnal Green", lines: ["Central"] },
+  { id: '940GZZLUCCK', name: "Chancery Lane", lines: ["Central"] },
+  { id: '940GZZLUCPC', name: "Canons Park", lines: ["Jubilee"] },
+  { id: '940GZZLUBMY', name: "Bermondsey", lines: ["Jubilee"] },
+  { id: '940GZZLUCWR', name: "Covent Garden", lines: ["Piccadilly"] },
+  { id: '940GZZLUDBN', name: "Debden", lines: ["Central"] },
+  { id: '940GZZLUDSN', name: "Denmark Hill", lines: ["Overground"] },
+  { id: '940GZZLUEPG', name: "Epping", lines: ["Central"] },
+  { id: '940GZZLUFPK', name: "Finsbury Park", lines: ["Piccadilly","Victoria"] },
+  { id: '940GZZLUGFD', name: "Greenford", lines: ["Central"] },
+  { id: '940GZZLUGVY', name: "Gunnersbury", lines: ["District","Overground"] },
+  { id: '940GZZLUHCH', name: "Hatton Cross", lines: ["Piccadilly"] },
+  { id: '940GZZLUHR1', name: "Heathrow T4", lines: ["Piccadilly"] },
+  { id: '940GZZLUHR5', name: "Heathrow T5", lines: ["Piccadilly","Elizabeth"] },
+  { id: '940GZZLUMDN', name: "Morden", lines: ["Northern"] },
+  { id: '940GZZLUMRH', name: "Marylebone", lines: ["Bakerloo"] },
+  { id: '940GZZLUMRD', name: "Mile End", lines: ["Central","District","Hammersmith & City"] },
+  { id: '940GZZLUNHG', name: "Notting Hill Gate", lines: ["Central","Circle","District"] },
+  { id: '940GZZLUPVL', name: "Pimlico", lines: ["Victoria"] },
+  { id: '940GZZLUSDS', name: "St Paul's", lines: ["Central"] },
+  { id: '940GZZLUTBN', name: "Tooting Bec", lines: ["Northern"] },
+  { id: '940GZZLUTBY', name: "Tooting Broadway", lines: ["Northern"] },
+  { id: '940GZZLUWJN', name: "Wembley Central", lines: ["Bakerloo","Overground"] },
+  { id: '940GZZLUWSM', name: "Westminster", lines: ["Circle","District","Jubilee"] },
 ];
 
 let selectedLines = new Set();
@@ -212,17 +290,37 @@ function buildLineGrid() {
 }
 
 function toggleLine(id, btn) {
-  if (selectedLines.has(id)) {
-    selectedLines.delete(id);
-    btn.classList.remove('selected');
-  } else {
-    selectedLines.add(id);
-    btn.classList.add('selected');
-  }
+  if (selectedLines.has(id)) { selectedLines.delete(id); btn.classList.remove('selected'); }
+  else { selectedLines.add(id); btn.classList.add('selected'); }
   save();
 }
 
-// ... (all other functions like onStationSearch, addStation, etc. are the same as your original)
+function onStationSearch() {
+  const q = document.getElementById('stationSearch').value.trim().toLowerCase();
+  const box = document.getElementById('searchResults');
+  if (q.length < 2) { box.classList.remove('show'); box.innerHTML = ''; return; }
+  const matches = ALL_STATIONS.filter(s => s.name.toLowerCase().includes(q)).slice(0, 8);
+  if (!matches.length) { box.innerHTML = '<div class="search-result-item" style="color:var(--muted)">No stations found</div>'; box.classList.add('show'); return; }
+  box.innerHTML = matches.map(s => `<div class="search-result-item" onclick="addStation('${s.id}','${s.name.replace(/'/g,"\\'")}','${s.lines.join(",")}')"><div>${s.name}</div><div class="result-line">${s.lines.join(' · ')}</div></div>`).join('');
+  box.classList.add('show');
+}
+
+function addStation(id, name, linesStr) {
+  if (savedStations.find(s => s.id === id)) { closeSearch(); return; }
+  savedStations.push({ id, name, lines: linesStr.split(',') });
+  save(); renderSavedStations(); closeSearch();
+}
+
+function closeSearch() {
+  document.getElementById('stationSearch').value = '';
+  document.getElementById('searchResults').classList.remove('show');
+  document.getElementById('searchResults').innerHTML = '';
+}
+
+function removeStation(id) {
+  savedStations = savedStations.filter(s => s.id !== id);
+  save(); renderSavedStations();
+}
 
 function renderSavedStations() {
   const el = document.getElementById('savedStations');
@@ -236,6 +334,93 @@ function renderSavedStations() {
       <button class="remove-btn" onclick="removeStation('${s.id}')">×</button>
     </div>
   `).join('');
+}
+
+function addTimeWindow(fw) {
+  const w = fw || { fromH: 7, fromM: 0, toH: 9, toM: 30 };
+  timeWindows.push(w);
+  save(); renderTimeWindows();
+}
+
+function removeTimeWindow(i) {
+  timeWindows.splice(i, 1);
+  save(); renderTimeWindows();
+}
+
+function renderTimeWindows() {
+  const el = document.getElementById('timeWindows');
+  if (!timeWindows.length) { el.innerHTML = ''; return; }
+  el.innerHTML = timeWindows.map((w, i) => `<div class="time-window-row"><span class="time-label">from</span><div class="time-picker">${makeHSelect(w.fromH, i, 'fromH')}<span class="time-sep">:</span>${makeMSelect(w.fromM, i, 'fromM')}</div><span class="time-arrow">→</span><div class="time-picker">${makeHSelect(w.toH, i, 'toH')}<span class="time-sep">:</span>${makeMSelect(w.toM, i, 'toM')}</div>${timeWindows.length > 1 ? `<button class="remove-time-btn" onclick="removeTimeWindow(${i})">×</button>` : ''}</div>`).join('');
+}
+
+function makeHSelect(val, idx, field) {
+  let o = '';
+  for (let h=0;h<=23;h++) o+=`<option value="${h}" ${h==val?'selected':''}>${String(h).padStart(2,'0')}</option>`;
+  return `<select onchange="updateTW(${idx},'${field}',this.value)">${o}</select>`;
+}
+
+function makeMSelect(val, idx, field) {
+  let o = '';
+  for (let m=0;m<=55;m+=5) o+=`<option value="${m}" ${m==val?'selected':''}>${String(m).padStart(2,'0')}</option>`;
+  return `<select onchange="updateTW(${idx},'${field}',this.value)">${o}</select>`;
+}
+
+function updateTW(idx, field, val) { timeWindows[idx][field] = parseInt(val); save(); }
+
+function toggleNotifications() {
+  notifEnabled = document.getElementById('notifToggle').checked;
+  save();
+  if (notifEnabled) {
+    if ('Notification' in window && Notification.permission !== 'granted') {
+      Notification.requestPermission().then(p => {
+        if (p !== 'granted') { showNotifAlert('⚠️ Notifications blocked.'); }
+        else { showNotifAlert('✅ <strong>Alerts enabled!</strong>'); startPolling(); }
+      });
+    } else {
+      showNotifAlert('✅ <strong>Alerts enabled!</strong>');
+      startPolling();
+    }
+  } else {
+    stopPolling();
+    document.getElementById('notifAlert').classList.remove('show');
+  }
+}
+
+function showNotifAlert(msg) {
+  const el = document.getElementById('notifAlert');
+  el.innerHTML = msg; el.classList.add('show');
+}
+
+function isInWindow() {
+  if (!timeWindows.length) return false;
+  const now = new Date();
+  const nowMins = now.getHours() * 60 + now.getMinutes();
+  return timeWindows.some(w => nowMins >= (w.fromH*60+w.fromM) && nowMins <= (w.toH*60+w.toM));
+}
+
+function startPolling() {
+  stopPolling();
+  notifInterval = setInterval(async () => { if (!isInWindow()) return; await checkStatus(true); }, 5*60*1000);
+}
+
+function stopPolling() { if (notifInterval) clearInterval(notifInterval); notifInterval = null; }
+
+async function checkStatus(silent = false) {
+  const hasLines = selectedLines.size > 0;
+  const hasStations = savedStations.length > 0;
+  if (!hasLines && !hasStations) { if (!silent) alert('Please select at least one line or station first.'); return; }
+
+  const btn = document.getElementById('checkBtn');
+  if (!silent) { btn.disabled = true; btn.innerHTML = 'Checking…'; }
+
+  try {
+    if (!silent) {
+      document.getElementById('resultsSection').style.display = 'block';
+    }
+  } catch(e) {}
+  finally {
+    if (!silent) { btn.disabled = false; btn.textContent = 'Check Commute'; }
+  }
 }
 
 async function testFullNotification() {
@@ -299,8 +484,6 @@ async function testFullNotification() {
     new Notification('Commute', { body: 'Could not fetch live data.' });
   }
 }
-
-// Add the rest of your original functions here (checkStatus, addTimeWindow, etc.)
 
 load();
 buildLineGrid();
