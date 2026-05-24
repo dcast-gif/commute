@@ -522,7 +522,7 @@ async function testFullNotification() {
     const hasStations = savedStations.length > 0;
     
     if (!hasLines && !hasStations) {
-      new Notification('Commute', { 
+      new Notification('', { 
         body: 'Please select lines or stations first.' 
       });
       return;
@@ -567,7 +567,7 @@ async function testFullNotification() {
       }
     }
 
-    new Notification('Commute', {
+    new Notification('', {
       body: body.trim(),
       icon: 'https://via.placeholder.com/192/7c6af7/ffffff?text=C'
     });
@@ -575,7 +575,7 @@ async function testFullNotification() {
     showNotifAlert('✅ Notification sent!');
 
   } catch (err) {
-    new Notification('Commute', { 
+    new Notification('', { 
       body: 'Could not fetch live data right now.' 
     });
   }
