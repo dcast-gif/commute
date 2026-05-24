@@ -382,6 +382,21 @@ function removeStation(id) {
 
 function renderSavedStations() {
   const el = document.getElementById('savedStations');
+  if (!savedStations.length) { 
+    el.innerHTML = '<div class="empty-stations">No stations saved yet — search above</div>'; 
+    return; 
+  }
+  
+  el.innerHTML = savedStations.map(s => `
+    <div class="saved-station">
+      <div>
+        <div class="saved-station-name">${s.name}</div>
+      </div>
+      <button class="remove-btn" onclick="removeStation('${s.id}')">×</button>
+    </div>
+  `).join('');
+}
+  const el = document.getElementById('savedStations');
   if (!savedStations.length) { el.innerHTML = '<div class="empty-stations">No stations saved yet — search above</div>'; return; }
   el.innerHTML = savedStations.map(s => `<div class="saved-station"><div><div class="saved-station-name">${s.name}</div><div class="saved-station-lines">${s.lines.join(' · ')}</div></div><button class="remove-btn" onclick="removeStation('${s.id}')">×</button></div>`).join('');
 }
