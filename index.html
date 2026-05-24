@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Commute · TfL Status</title>
+  <title>Commute · TfL Status</title>
   
   <!-- PWA Settings -->
   <link rel="manifest" href="manifest.json">
@@ -91,7 +91,7 @@
   <header>
     <div>
       <div class="eyebrow">TfL LIVE STATUS</div>
-      <h1>My Commute</h1>
+      <h1>Commute</h1>
     </div>
     <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()">☀️</div>
   </header>
@@ -139,7 +139,7 @@
     </div>
   </div>
 
-<button class="check-btn" id="checkBtn" onclick="checkStatus()">Check My Commute Now</button>
+<button class="check-btn" id="checkBtn" onclick="checkStatus()">Check Commute Now</button>
 <button class="check-btn" style="background:#22c55e; margin-top: 0.6rem;" onclick="testFullNotification()">🧪 Test Real Notification</button>
 
   <div id="resultsSection" class="results-section" style="display:none">
@@ -458,7 +458,7 @@ async function checkStatus(silent = false) {
     }
   } catch(e) {}
   finally {
-    if (!silent) { btn.disabled = false; btn.textContent = 'Check My Commute Now'; }
+    if (!silent) { btn.disabled = false; btn.textContent = 'Check Commute Now'; }
   }
 }
 function testNotification() {
@@ -469,7 +469,7 @@ function testNotification() {
   
   if (Notification.permission === 'granted') {
     new Notification('🧪 Test Notification', {
-      body: 'This is a test from My Commute. If you see this, notifications are working!',
+      body: 'This is a test from Commute. If you see this, notifications are working!',
       icon: 'https://via.placeholder.com/192/7c6af7/ffffff?text=C'
     });
     showNotifAlert('✅ Test notification sent!');
@@ -497,7 +497,7 @@ async function testFullNotification() {
     const hasStations = savedStations.length > 0;
     
     if (!hasLines && !hasStations) {
-      new Notification('My Commute', { 
+      new Notification('Commute', { 
         body: 'Please select lines or stations first.' 
       });
       return;
@@ -550,7 +550,7 @@ async function testFullNotification() {
     showNotifAlert('✅ Notification sent!');
 
   } catch (err) {
-    new Notification('My Commute', { 
+    new Notification('Commute', { 
       body: 'Could not fetch live data right now.' 
     });
   }
