@@ -140,7 +140,7 @@
   </div>
 
 <button class="check-btn" id="checkBtn" onclick="checkStatus()">Check My Commute Now</button>
-<button class="check-btn" style="background:#22c55e; margin-top: 0.6rem;" onclick="testNotification()">🧪 Test Notification</button>
+<button class="check-btn" style="background:#22c55e; margin-top: 0.6rem;" onclick="testFullNotification()">🧪 Test Real Notification</button>
 
   <div id="resultsSection" class="results-section" style="display:none">
     <div class="results-header" id="resultsHeader"></div>
@@ -481,6 +481,61 @@ function testNotification() {
         alert('Notification permission denied. Check iOS Settings > Commute > Notifications');
       }
     });
+  }
+}
+async function testFullNotification() {
+  if (!('Notification' in window) || Notification.permission !== 'granted') {
+    alert("Please enable notifications first");
+    return;
+  }
+
+  showNotifAlert('🔍 Checking status for notification...');
+  
+  try {
+    // Run the actual status check
+    const hasLines = selectedLines.size > 0;
+    const hasStations = savedStations.length > 0;
+    
+    if (!hasLines && !hasStations) {
+      new Notification('My Commute', { 
+        body: 'Please select some lines or stations first!' 
+      });
+      return;
+    }
+
+    let message = "Commute Status:\n";
+    
+    // Check lines
+    if (hasLines) {
+      const ids = [...selectedLines].join(',');
+      const res = await fetch(`https://api.tfl.gov.uk/Line/${encodeURIComponent(ids)}/Status`);
+      if (res.ok) {
+        const data = await res.json();
+        data.forEach(line => {
+          const status = line.lineStatuses?.[0]?.statusSeverityDescription || 'Unknown';
+          message += `• ${line.name}: ${status}\n`;
+        });
+      }
+    }
+
+    // Check stations
+    if (hasStations) {
+      message += "\nStations:\n";
+      for (const station of savedStations) {
+        message += `• ${station.name}: OK\n`;
+      }
+    }
+
+    // Send the notification
+    new Notification('🚇 My Commute Now', {
+      body: message.length > 200 ? message.substring(0, 180) + '...' : message,
+      icon: 'https://via.placeholder.com/192/7c6af7/ffffff?text=C'
+    });
+
+    showNotifAlert('✅ Status notification sent!');
+
+  } catch (err) {
+    new Notification('My Commute', { body: 'Could not fetch live status right now.' });
   }
 }
 load();
