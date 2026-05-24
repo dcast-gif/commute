@@ -164,7 +164,7 @@
     </div>
   </div>
 
-<button class="check-btn" id="checkBtn" onclick="checkStatus()">Check Commute Now</button>
+<button class="check-btn" id="checkBtn" onclick="checkStatus()">Check Commute</button>
 <button class="check-btn" style="background:#22c55e; margin-top: 0.6rem;" onclick="testFullNotification()">🧪 Test Real Notification</button>
 
   <div id="resultsSection" class="results-section" style="display:none">
@@ -483,7 +483,7 @@ async function checkStatus(silent = false) {
     }
   } catch(e) {}
   finally {
-    if (!silent) { btn.disabled = false; btn.textContent = 'Check Commute Now'; }
+    if (!silent) { btn.disabled = false; btn.textContent = 'Check Commute'; }
   }
 }
 function testNotification() {
