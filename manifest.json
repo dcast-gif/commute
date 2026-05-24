@@ -1,16 +1,10 @@
 {
-  "name": "My Commute",
+  "name": "Commute - TfL Live Status",
   "short_name": "Commute",
-  "description": "TfL Live Status for my daily commute",
-  "start_url": "index.html",
+  "description": "Live TfL commute profiles, alerts, journey estimates and reliability history.",
+  "start_url": ".",
   "display": "standalone",
-  "background_color": "#0a0a0f",
-  "theme_color": "#7c6af7",
-  "icons": [
-    {
-      "src": "https://via.placeholder.com/192/7c6af7/ffffff?text=C",
-      "sizes": "192x192",
-      "type": "image/png"
-    }
-  ]
+  "background_color": "#07111f",
+  "theme_color": "#0b1220",
+  "icons": [{ "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
 }
