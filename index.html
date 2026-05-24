@@ -67,7 +67,32 @@
     .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.3rem; margin-bottom: 1rem; }
     .section-card h2 { font-size: 0.72rem; font-family: 'Space Mono', monospace; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; }
 
-    .line-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.45rem; margin-bottom: 1rem; }
+.line-grid { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
+  gap: 0.45rem; 
+  margin-bottom: 1rem; 
+  justify-items: center;
+}
+
+.line-btn {
+  display: flex; 
+  align-items: center; 
+  gap: 0.5rem; 
+  padding: 0.5rem 0.7rem; 
+  border-radius: 8px; 
+  border: 1.5px solid var(--border); 
+  background: transparent; 
+  color: var(--muted); 
+  font-family: 'Syne', sans-serif; 
+  font-size: 0.78rem; 
+  font-weight: 600; 
+  cursor: pointer; 
+  transition: all 0.15s; 
+  text-align: center;
+  justify-content: center;
+  width: 100%;
+}
     .line-btn { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.7rem; border-radius: 8px; border: 1.5px solid var(--border); background: transparent; color: var(--muted); font-family: 'Syne', sans-serif; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
     .line-btn.selected { border-color: var(--line-color, var(--accent)); background: color-mix(in srgb, var(--line-color, var(--accent)) 12%, transparent); color: var(--text); }
 
