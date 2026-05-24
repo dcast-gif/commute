@@ -1,819 +1,133 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Commute · TfL Status</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0a0a0f">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<link rel="apple-touch-icon" href="https://via.placeholder.com/192/7c6af7/ffffff?text=C">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg: #0a0a0f; --surface: #12121a; --surface2: #1a1a26; --border: #1e1e2e; --border2: #2a2a3e;
-  --text: #e8e8f0; --muted: #5a5a7a; --accent: #7c6af7;
-  --good: #22c55e; --warn: #f59e0b; --bad: #ef4444;
-  --good-bg: rgba(34,197,94,0.08); --warn-bg: rgba(245,158,11,0.08); --bad-bg: rgba(239,68,68,0.08);
-}
-[data-theme="light"] {
-  --bg: #f4f4f8; --surface: #ffffff; --surface2: #ededf3; --border: #e0e0ec; --border2: #d0d0e0;
-  --text: #1a1a2e; --muted: #7070a0; --accent: #6f42c1;
-}
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; padding: 0 0 4rem; transition: background 0.3s; overflow-x: hidden; }
-body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse 60% 40% at 70% 20%, rgba(124,106,247,0.07) 0%, transparent 60%), radial-gradient(ellipse 40% 50% at 10% 80%, rgba(34,197,94,0.04) 0%, transparent 60%); pointer-events: none; z-index: 0; }
-
-/* ── SIDEBAR MENU ── */
-.sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: none; opacity: 0; transition: opacity 0.25s; }
-.sidebar-overlay.open { display: block; opacity: 1; }
-.sidebar { position: fixed; top: 0; left: -280px; width: 260px; height: 100%; background: var(--surface); border-right: 1px solid var(--border); z-index: 101; transition: left 0.28s cubic-bezier(0.4,0,0.2,1); padding: 0; display: flex; flex-direction: column; }
-.sidebar.open { left: 0; }
-.sidebar-header { padding: 3rem 1.3rem 1rem; border-bottom: 1px solid var(--border); }
-.sidebar-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; background: linear-gradient(135deg, var(--text) 30%, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.sidebar-subtitle { font-size: 0.72rem; color: var(--muted); font-family: 'Space Mono', monospace; margin-top: 0.2rem; letter-spacing: 0.08em; }
-.sidebar-nav { padding: 0.8rem 0.6rem; flex: 1; }
-.sidebar-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.75rem 0.8rem; border-radius: 10px; cursor: pointer; font-size: 0.9rem; font-weight: 500; color: var(--muted); transition: all 0.15s; margin-bottom: 0.15rem; border: none; background: transparent; width: 100%; text-align: left; }
-.sidebar-item:hover { background: var(--surface2); color: var(--text); }
-.sidebar-item.active { background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); font-weight: 600; }
-.sidebar-item .si-icon { font-size: 1.1rem; width: 22px; text-align: center; }
-.sidebar-divider { height: 1px; background: var(--border); margin: 0.6rem 0.8rem; }
-.sidebar-footer { padding: 1rem 0.6rem; border-top: 1px solid var(--border); }
-
-/* ── TOPBAR ── */
-.topbar { position: sticky; top: 0; z-index: 10; background: var(--bg); border-bottom: 1px solid var(--border); padding: 0.9rem 1rem; display: flex; align-items: center; justify-content: space-between; }
-.topbar-left { display: flex; align-items: center; gap: 0.8rem; }
-.menu-btn { width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; flex-shrink: 0; }
-.menu-btn span { display: block; width: 16px; height: 1.5px; background: var(--text); border-radius: 2px; transition: all 0.2s; }
-.topbar-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; background: linear-gradient(135deg, var(--text) 30%, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.topbar-eyebrow { font-family: 'Space Mono', monospace; font-size: 0.52rem; color: var(--accent); letter-spacing: 0.14em; text-transform: uppercase; }
-.theme-toggle { background: var(--surface2); border: 1px solid var(--border); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; flex-shrink: 0; }
-
-/* ── PAGES ── */
-.page { display: none; padding: 1.2rem 1rem 2rem; max-width: 640px; margin: 0 auto; position: relative; z-index: 1; }
-.page.active { display: block; }
-
-/* ── NOTIF BANNER ── */
-.notif-alert { background: rgba(124,106,247,0.1); border: 1px solid rgba(124,106,247,0.25); border-radius: 12px; padding: 0.7rem 1rem; margin-bottom: 1rem; font-size: 0.84rem; line-height: 1.5; color: var(--text); display: none; }
-.notif-alert.show { display: block; }
-.notif-alert strong { color: var(--accent); }
-
-/* ── TABS ── */
-.tab-bar { display: flex; gap: 0.4rem; margin-bottom: 1.1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 0.28rem; }
-.tab { flex: 1; padding: 0.52rem; border-radius: 9px; border: none; background: transparent; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
-.tab.active { background: var(--accent); color: #fff; }
-.panel { display: none; }
-.panel.active { display: block; }
-
-/* ── SECTION CARD ── */
-.section-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.1rem; margin-bottom: 0.9rem; }
-.section-label { font-family: 'Space Mono', monospace; font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.85rem; }
-
-/* ── LINES ── */
-.line-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.4rem; }
-.line-btn { display: flex; align-items: center; gap: 0.5rem; padding: 0.52rem 0.75rem; border-radius: 9px; border: 1.5px solid var(--border); background: transparent; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.15s; text-align: left; width: 100%; }
-.line-btn.selected { border-color: var(--line-color, var(--accent)); background: color-mix(in srgb, var(--line-color, var(--accent)) 12%, transparent); color: var(--text); font-weight: 600; }
-.line-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-
-/* ── STATIONS ── */
-.search-input { width: 100%; background: var(--surface2); border: 1.5px solid var(--border2); border-radius: 10px; padding: 0.65rem 0.9rem; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.88rem; outline: none; transition: border-color 0.15s; margin-bottom: 0.6rem; }
-.search-input:focus { border-color: var(--accent); }
-.search-input::placeholder { color: var(--muted); }
-.search-results { background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; overflow: hidden; margin-bottom: 0.8rem; display: none; }
-.search-results.show { display: block; }
-.search-result-item { padding: 0.65rem 0.9rem; cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.1s; }
-.search-result-item:last-child { border-bottom: none; }
-.search-result-item:active { background: var(--border); }
-.result-name { font-size: 0.87rem; font-weight: 500; color: var(--text); }
-.result-lines-tag { font-size: 0.65rem; color: var(--muted); font-family: 'Space Mono', monospace; margin-top: 0.12rem; }
-.saved-stations { display: flex; flex-direction: column; gap: 0.4rem; }
-.saved-station-chip { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; padding: 0.55rem 0.5rem 0.55rem 0.85rem; border-radius: 9px; border: 1.5px solid var(--border2); background: var(--surface2); }
-.chip-left { display: flex; flex-direction: column; min-width: 0; flex: 1; }
-.chip-name { font-size: 0.87rem; font-weight: 600; color: var(--text); }
-.chip-lines { font-size: 0.63rem; color: var(--muted); font-family: 'Space Mono', monospace; margin-top: 0.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.chip-remove { flex-shrink: 0; width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--border2); background: var(--surface); color: var(--muted); font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.12s; }
-.chip-remove:hover { background: var(--bad); border-color: var(--bad); color: #fff; }
-.empty-stations { color: var(--muted); font-size: 0.82rem; padding: 0.4rem 0; }
-
-/* ── DAYS ── */
-.days-grid { display: flex; gap: 0.35rem; flex-wrap: wrap; }
-.day-btn { flex: 1; min-width: 36px; padding: 0.5rem 0.2rem; border-radius: 8px; border: 1.5px solid var(--border); background: transparent; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.15s; text-align: center; }
-.day-btn.selected { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); }
-
-/* ── TIMES ── */
-.time-windows { display: flex; flex-direction: column; gap: 0.45rem; margin-bottom: 0.8rem; }
-.time-window-row { display: flex; align-items: center; gap: 0.5rem; background: var(--surface2); border: 1.5px solid var(--border2); border-radius: 10px; padding: 0.55rem 0.75rem; }
-.tw-inner { display: flex; align-items: center; gap: 0.35rem; flex: 1; flex-wrap: wrap; }
-.tw-label { font-family: 'Space Mono', monospace; font-size: 0.58rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; width: 24px; flex-shrink: 0; }
-.tw-picker { display: flex; align-items: center; gap: 0.2rem; }
-.tw-picker select { background: var(--surface); border: 1px solid var(--border2); border-radius: 6px; color: var(--text); font-family: 'Space Mono', monospace; font-size: 0.86rem; padding: 0.22rem 0.28rem; outline: none; cursor: pointer; -webkit-appearance: none; appearance: none; text-align: center; }
-.tw-picker select option { background: var(--surface2); }
-.tw-sep { font-family: 'Space Mono', monospace; color: var(--muted); font-size: 0.88rem; }
-.tw-arrow { color: var(--muted); font-size: 0.72rem; padding: 0 0.1rem; flex-shrink: 0; }
-.tw-remove { flex-shrink: 0; width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--border2); background: transparent; color: var(--muted); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.12s; }
-.tw-remove:hover { background: var(--bad); border-color: var(--bad); color: #fff; }
-.add-time-btn { display: flex; align-items: center; justify-content: center; gap: 0.4rem; width: 100%; padding: 0.58rem; border-radius: 10px; border: 1.5px dashed var(--border2); background: transparent; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 0.83rem; font-weight: 500; cursor: pointer; transition: all 0.15s; }
-.add-time-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-/* ── NOTIF TOGGLE ── */
-.notif-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.7rem; }
-.notif-label { font-size: 0.9rem; font-weight: 500; }
-.toggle { position: relative; width: 44px; height: 24px; }
-.toggle input { opacity: 0; width: 0; height: 0; }
-.toggle-slider { position: absolute; inset: 0; background: var(--border2); border-radius: 24px; cursor: pointer; transition: background 0.2s; }
-.toggle-slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform 0.2s; }
-.toggle input:checked + .toggle-slider { background: var(--accent); }
-.toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
-.notif-note { font-size: 0.76rem; color: var(--muted); line-height: 1.55; }
-
-/* ── BUTTONS ── */
-.btn { width: 100%; padding: 0.82rem; border-radius: 11px; border: none; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: opacity 0.15s, transform 0.12s; margin-top: 0.4rem; letter-spacing: 0.01em; }
-.btn:hover { opacity: 0.88; transform: translateY(-1px); }
-.btn:active { transform: translateY(0); }
-.btn:disabled { opacity: 0.45; cursor: default; transform: none; }
-.btn-primary { background: var(--accent); }
-.btn-green { background: #22c55e; }
-.btn-save { background: var(--surface); border: 1.5px solid var(--border2); color: var(--text); }
-.btn-save:hover { border-color: var(--accent); }
-
-/* ── RESULTS ── */
-.results-section { margin-top: 0.9rem; }
-.results-header { font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.65rem; }
-.results { display: flex; flex-direction: column; gap: 0.55rem; }
-.status-card { border-radius: 13px; border: 1px solid var(--border); padding: 0.85rem 1.05rem; display: flex; align-items: flex-start; gap: 0.85rem; animation: slideIn 0.22s ease both; }
-@keyframes slideIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-.status-card.good  { background: var(--good-bg); border-color: rgba(34,197,94,0.2); }
-.status-card.minor { background: var(--warn-bg); border-color: rgba(245,158,11,0.25); }
-.status-card.bad   { background: var(--bad-bg);  border-color: rgba(239,68,68,0.25); }
-.card-bar { width: 3px; border-radius: 4px; align-self: stretch; flex-shrink: 0; min-height: 22px; }
-.card-body { flex: 1; min-width: 0; }
-.card-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.12rem; flex-wrap: wrap; }
-.card-name { font-size: 0.9rem; font-weight: 600; }
-.card-type { font-family: 'Space Mono', monospace; font-size: 0.54rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
-.status-badge { font-family: 'Space Mono', monospace; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.18em 0.55em; border-radius: 4px; white-space: nowrap; }
-.good  .status-badge { background: rgba(34,197,94,0.15);  color: var(--good); }
-.minor .status-badge { background: rgba(245,158,11,0.15); color: var(--warn); }
-.bad   .status-badge { background: rgba(239,68,68,0.15);  color: var(--bad); }
-.card-reason { font-size: 0.76rem; color: var(--muted); line-height: 1.5; margin-top: 0.1rem; }
-.meta { margin-top: 0.75rem; font-family: 'Space Mono', monospace; font-size: 0.58rem; color: var(--muted); text-align: right; }
-.spinner { display: inline-block; width: 13px; height: 13px; border: 2px solid rgba(255,255,255,0.25); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 5px; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.empty-state { text-align: center; padding: 1.5rem; color: var(--muted); font-size: 0.86rem; }
-
-/* ── SAVED ROUTES PAGE ── */
-.page-heading { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; margin-bottom: 0.3rem; }
-.page-sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 1.3rem; }
-.route-list { display: flex; flex-direction: column; gap: 0.6rem; }
-.route-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1rem 1.1rem; cursor: pointer; transition: border-color 0.15s; position: relative; }
-.route-card:hover { border-color: var(--accent); }
-.route-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.5rem; }
-.route-name { font-size: 0.95rem; font-weight: 700; }
-.route-actions { display: flex; gap: 0.4rem; flex-shrink: 0; }
-.route-action-btn { width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--border2); background: var(--surface2); color: var(--muted); font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.12s; }
-.route-action-btn:hover { color: var(--text); border-color: var(--text); }
-.route-action-btn.delete:hover { background: var(--bad); border-color: var(--bad); color: #fff; }
-.route-meta-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-.route-tag { font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 0.05em; padding: 0.18em 0.55em; border-radius: 5px; background: var(--surface2); color: var(--muted); border: 1px solid var(--border2); }
-.route-tag.day { color: var(--accent); border-color: rgba(124,106,247,0.3); background: rgba(124,106,247,0.08); }
-.empty-routes { text-align: center; padding: 3rem 1rem; color: var(--muted); }
-.empty-routes .er-icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
-.empty-routes p { font-size: 0.88rem; line-height: 1.6; }
-
-/* ── MODAL ── */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; display: none; align-items: flex-end; justify-content: center; padding: 1rem; }
-.modal-overlay.open { display: flex; }
-.modal { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 1.5rem; width: 100%; max-width: 500px; animation: modalUp 0.25s ease; }
-@keyframes modalUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-.modal h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; margin-bottom: 0.35rem; }
-.modal p { font-size: 0.82rem; color: var(--muted); margin-bottom: 1rem; line-height: 1.5; }
-.modal-input { width: 100%; background: var(--surface2); border: 1.5px solid var(--border2); border-radius: 10px; padding: 0.7rem 0.9rem; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.95rem; outline: none; transition: border-color 0.15s; margin-bottom: 1rem; }
-.modal-input:focus { border-color: var(--accent); }
-.modal-btns { display: flex; gap: 0.5rem; }
-.modal-btns .btn { margin-top: 0; flex: 1; }
-.btn-cancel { background: var(--surface2); color: var(--muted); border: 1px solid var(--border2); }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1220" />
+  <meta name="description" content="A live TfL commute assistant with route profiles, alerts, journey estimates and disruption history." />
+  <title>Commute - TfL Live Status</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icons/icon.svg" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
-<body data-theme="dark">
+<body>
+  <header class="app-header">
+    <a class="brand" href="#home" aria-label="Commute home">
+      <span class="brand-mark">C</span>
+      <span><strong>Commute</strong><small>TfL Live Status</small></span>
+    </a>
+    <nav class="tabs" aria-label="Main navigation">
+      <a href="#home" data-tab-link="home">Home</a>
+      <a href="#routes" data-tab-link="routes">Routes</a>
+      <a href="#history" data-tab-link="history">History</a>
+      <a href="#settings" data-tab-link="settings">Settings</a>
+    </nav>
+    <button id="themeToggle" class="ghost" type="button">Toggle theme</button>
+  </header>
 
-<!-- SIDEBAR OVERLAY -->
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
-
-<!-- SIDEBAR -->
-<div class="sidebar" id="sidebar">
-  <div class="sidebar-header">
-    <div class="sidebar-title">Commute</div>
-    <div class="sidebar-subtitle">TfL Live Status</div>
-  </div>
-  <nav class="sidebar-nav">
-    <button class="sidebar-item active" id="nav-home" onclick="navigateTo('home')">
-      <span class="si-icon">🏠</span> Home
-    </button>
-    <button class="sidebar-item" id="nav-routes" onclick="navigateTo('routes')">
-      <span class="si-icon">🗺️</span> Saved Routes
-    </button>
-    <div class="sidebar-divider"></div>
-    <button class="sidebar-item" onclick="toggleTheme(); closeSidebar()">
-      <span class="si-icon" id="themeIcon">☀️</span> <span id="themeLabel">Light mode</span>
-    </button>
-  </nav>
-</div>
-
-<!-- TOPBAR -->
-<div class="topbar">
-  <div class="topbar-left">
-    <div class="menu-btn" onclick="openSidebar()">
-      <span></span><span></span><span></span>
-    </div>
-    <div>
-      <div class="topbar-eyebrow">TfL Live Status</div>
-      <div class="topbar-title">Commute</div>
-    </div>
-  </div>
-  <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()">☀️</div>
-</div>
-
-<!-- HOME PAGE -->
-<div class="page active" id="page-home">
-  <div id="notifAlert" class="notif-alert"></div>
-
-  <div class="tab-bar">
-    <button class="tab active" onclick="switchTab('lines', this)">🚇 Lines</button>
-    <button class="tab" onclick="switchTab('stations', this)">📍 Stations</button>
-    <button class="tab" onclick="switchTab('times', this)">⏰ Times</button>
-  </div>
-
-  <!-- LINES -->
-  <div id="panel-lines" class="panel active">
-    <div class="section-card">
-      <div class="section-label">Select your lines</div>
-      <div class="line-grid" id="lineGrid"></div>
-    </div>
-  </div>
-
-  <!-- STATIONS -->
-  <div id="panel-stations" class="panel">
-    <div class="section-card">
-      <div class="section-label">Search stations</div>
-      <input type="text" id="stationSearch" class="search-input" placeholder="e.g. Kings Cross, Vauxhall…" oninput="onStationSearch()" autocomplete="off">
-      <div id="searchResults" class="search-results"></div>
-      <div class="section-label" style="margin-top:0.1rem">Saved stations</div>
-      <div id="savedStations" class="saved-stations">
-        <div class="empty-stations">No stations saved yet — search above</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TIMES -->
-  <div id="panel-times" class="panel">
-    <div class="section-card">
-      <div class="section-label">Alert windows</div>
-      <div class="time-windows" id="timeWindows"></div>
-      <button class="add-time-btn" onclick="addTimeWindow()">＋ Add time window</button>
-    </div>
-    <div class="section-card">
-      <div class="section-label">Active days</div>
-      <div class="days-grid" id="daysGrid"></div>
-    </div>
-    <div class="section-card">
-      <div class="section-label">Notifications</div>
-      <div class="notif-row">
-        <span class="notif-label">Enable alerts</span>
-        <label class="toggle"><input type="checkbox" id="notifToggle" onchange="toggleNotifications()"><span class="toggle-slider"></span></label>
-      </div>
-      <p class="notif-note">Checks every 5 minutes during alert windows on selected days. Keep this page open or add to your Home Screen.</p>
-    </div>
-  </div>
-
-  <button class="btn btn-primary" id="checkBtn" onclick="checkStatus()">Check Commute</button>
-  <button class="btn btn-green" style="margin-top:0.45rem" onclick="testFullNotification()">🧪 Test Notification</button>
-  <button class="btn btn-save" onclick="openSaveModal()">💾 Save as Route…</button>
-
-  <div id="resultsSection" class="results-section" style="display:none">
-    <div class="results-header" id="resultsHeader"></div>
-    <div id="results" class="results"></div>
-    <div class="meta" id="meta"></div>
-  </div>
-</div>
-
-<!-- SAVED ROUTES PAGE -->
-<div class="page" id="page-routes">
-  <div class="page-heading">Saved Routes</div>
-  <p class="page-sub">Tap a route to load it. Your lines, stations, times and days will all be restored.</p>
-  <div class="route-list" id="routeList"></div>
-</div>
-
-<!-- SAVE MODAL -->
-<div class="modal-overlay" id="saveModal">
-  <div class="modal">
-    <h3>Name this route</h3>
-    <p>Give your current lines, stations, times and days a name so you can load them again quickly.</p>
-    <input type="text" class="modal-input" id="routeNameInput" placeholder="e.g. Commuting, Evening, Weekend…" maxlength="40">
-    <div class="modal-btns">
-      <button class="btn btn-cancel" onclick="closeSaveModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveRoute()">Save Route</button>
-    </div>
-  </div>
-</div>
-
-<script>
-// ── DATA ──────────────────────────────────────────────────
-const LINES = [
-  { id: 'bakerloo', name: 'Bakerloo', color: '#B36305' },
-  { id: 'central', name: 'Central', color: '#E32017' },
-  { id: 'circle', name: 'Circle', color: '#FFD300' },
-  { id: 'district', name: 'District', color: '#00782A' },
-  { id: 'dlr', name: 'DLR', color: '#00A4A7' },
-  { id: 'elizabeth', name: 'Elizabeth', color: '#9B0056' },
-  { id: 'hammersmith-city', name: 'Hammersmith & City', color: '#F3A9BB' },
-  { id: 'jubilee', name: 'Jubilee', color: '#A0A5A9' },
-  { id: 'london-overground', name: 'Overground', color: '#EE7C0E' },
-  { id: 'metropolitan', name: 'Metropolitan', color: '#9B0056' },
-  { id: 'northern', name: 'Northern', color: '#555' },
-  { id: 'piccadilly', name: 'Piccadilly', color: '#003688' },
-  { id: 'victoria', name: 'Victoria', color: '#0098D4' },
-  { id: 'waterloo-city', name: 'Waterloo & City', color: '#95CDBA' },
-];
-const ALL_STATIONS = [
-  { id: '940GZZLUASL', name: "Angel", lines: ["Northern"] },
-  { id: '940GZZLUBBN', name: "Barbican", lines: ["Circle","Hammersmith & City","Metropolitan"] },
-  { id: '940GZZLUBKF', name: "Blackfriars", lines: ["Circle","District"] },
-  { id: '940GZZLUBND', name: "Bond Street", lines: ["Central","Jubilee"] },
-  { id: '940GZZLUBWR', name: "Bow Road", lines: ["District","Hammersmith & City"] },
-  { id: '940GZZLUBXN', name: "Brixton", lines: ["Victoria"] },
-  { id: '940GZZLUCAL', name: "Caledonian Road", lines: ["Piccadilly"] },
-  { id: '940GZZLUCMD', name: "Canada Water", lines: ["Jubilee","Overground"] },
-  { id: '940GZZLUCSM', name: "Cannon Street", lines: ["Circle","District"] },
-  { id: '940GZZLUCFM', name: "Canary Wharf", lines: ["Jubilee"] },
-  { id: '940GZZLUCHX', name: "Charing Cross", lines: ["Bakerloo","Northern"] },
-  { id: '940GZZLUCWL', name: "Clapham Common", lines: ["Northern"] },
-  { id: '940GZZLUCJN', name: "Clapham Junction", lines: ["Overground"] },
-  { id: '940GZZLUCPK', name: "Clapham North", lines: ["Northern"] },
-  { id: '940GZZLUCPS', name: "Clapham South", lines: ["Northern"] },
-  { id: '940GZZLUECT', name: "Earl's Court", lines: ["District","Piccadilly"] },
-  { id: '940GZZLUELN', name: "Elephant & Castle", lines: ["Bakerloo","Northern"] },
-  { id: '940GZZLUEAC', name: "Euston", lines: ["Northern","Victoria"] },
-  { id: '940GZZLUEUS', name: "Euston Square", lines: ["Circle","Hammersmith & City","Metropolitan"] },
-  { id: '940GZZLUFBY', name: "Farringdon", lines: ["Circle","Elizabeth","Hammersmith & City","Metropolitan"] },
-  { id: '940GZZLUGPK', name: "Green Park", lines: ["Jubilee","Piccadilly","Victoria"] },
-  { id: '940GZZLUHBN', name: "Hammersmith", lines: ["Circle","District","Hammersmith & City","Piccadilly"] },
-  { id: '940GZZLUHR4', name: "Heathrow T2&3", lines: ["Piccadilly"] },
-  { id: '940GZZLUHGH', name: "Highbury & Islington", lines: ["Victoria","Overground"] },
-  { id: '940GZZLUHLT', name: "Holborn", lines: ["Central","Piccadilly"] },
-  { id: '940GZZLUHPK', name: "Hyde Park Corner", lines: ["Piccadilly"] },
-  { id: '940GZZLUKSX', name: "King's Cross St. Pancras", lines: ["Circle","Hammersmith & City","Metropolitan","Northern","Piccadilly","Victoria"] },
-  { id: '940GZZLUKBN', name: "Kennington", lines: ["Northern"] },
-  { id: '940GZZLUKSL', name: "Knightsbridge", lines: ["Piccadilly"] },
-  { id: '940GZZLULVT', name: "Liverpool Street", lines: ["Central","Circle","Elizabeth","Hammersmith & City","Metropolitan"] },
-  { id: '940GZZLULBN', name: "London Bridge", lines: ["Jubilee","Northern"] },
-  { id: '940GZZLULSQ', name: "Leicester Square", lines: ["Northern","Piccadilly"] },
-  { id: '940GZZLUMAR', name: "Marble Arch", lines: ["Central"] },
-  { id: '940GZZLUMGT', name: "Moorgate", lines: ["Circle","Hammersmith & City","Metropolitan","Northern"] },
-  { id: '940GZZLUODS', name: "Old Street", lines: ["Northern"] },
-  { id: '940GZZLUOXC', name: "Oxford Circus", lines: ["Bakerloo","Central","Victoria"] },
-  { id: '940GZZLUPAD', name: "Paddington", lines: ["Bakerloo","Circle","District","Elizabeth","Hammersmith & City"] },
-  { id: '940GZZLUPCC', name: "Piccadilly Circus", lines: ["Bakerloo","Piccadilly"] },
-  { id: '940GZZLUQWY', name: "Queensway", lines: ["Central"] },
-  { id: '940GZZLURSG', name: "Russell Square", lines: ["Piccadilly"] },
-  { id: '940GZZLUSGP', name: "Seven Sisters", lines: ["Victoria"] },
-  { id: '940GZZLUSBC', name: "Shepherd's Bush", lines: ["Central"] },
-  { id: '940GZZLUSJP', name: "St. James's Park", lines: ["Circle","District"] },
-  { id: '940GZZLUSPK', name: "Stockwell", lines: ["Northern","Victoria"] },
-  { id: '940GZZLUSTM', name: "Stamford Brook", lines: ["District"] },
-  { id: '940GZZLUSTD', name: "Stratford", lines: ["Central","DLR","Jubilee","Overground"] },
-  { id: '940GZZLUSUT', name: "Southwark", lines: ["Jubilee"] },
-  { id: '940GZZLUTCR', name: "Tottenham Court Road", lines: ["Central","Elizabeth","Northern"] },
-  { id: '940GZZLUTHR', name: "Tottenham Hale", lines: ["Victoria","Overground"] },
-  { id: '940GZZLUVXL', name: "Vauxhall", lines: ["Victoria"] },
-  { id: '940GZZLUVIC', name: "Victoria", lines: ["Circle","District","Victoria"] },
-  { id: '940GZZLUWKN', name: "Waterloo", lines: ["Bakerloo","Jubilee","Northern","Waterloo & City"] },
-  { id: '940GZZLUWBP', name: "Westminster", lines: ["Circle","District","Jubilee"] },
-  { id: '940GZZLUWPL', name: "White City", lines: ["Central"] },
-  { id: '940GZZLUWLO', name: "Whitechapel", lines: ["District","Elizabeth","Hammersmith & City"] },
-  { id: '940GZZLUWIM', name: "Wimbledon", lines: ["District","Overground"] },
-  { id: '940GZZLUBST', name: "Baker Street", lines: ["Bakerloo","Circle","Hammersmith & City","Jubilee","Metropolitan"] },
-  { id: '940GZZLUBHF', name: "Bethnal Green", lines: ["Central"] },
-  { id: '940GZZLUCCK', name: "Chancery Lane", lines: ["Central"] },
-  { id: '940GZZLUCPC', name: "Canons Park", lines: ["Jubilee"] },
-  { id: '940GZZLUBMY', name: "Bermondsey", lines: ["Jubilee"] },
-  { id: '940GZZLUCWR', name: "Covent Garden", lines: ["Piccadilly"] },
-  { id: '940GZZLUDBN', name: "Debden", lines: ["Central"] },
-  { id: '940GZZLUDSN', name: "Denmark Hill", lines: ["Overground"] },
-  { id: '940GZZLUEPG', name: "Epping", lines: ["Central"] },
-  { id: '940GZZLUFPK', name: "Finsbury Park", lines: ["Piccadilly","Victoria"] },
-  { id: '940GZZLUGFD', name: "Greenford", lines: ["Central"] },
-  { id: '940GZZLUGVY', name: "Gunnersbury", lines: ["District","Overground"] },
-  { id: '940GZZLUHCH', name: "Hatton Cross", lines: ["Piccadilly"] },
-  { id: '940GZZLUHR1', name: "Heathrow T4", lines: ["Piccadilly"] },
-  { id: '940GZZLUHR5', name: "Heathrow T5", lines: ["Piccadilly","Elizabeth"] },
-  { id: '940GZZLUMDN', name: "Morden", lines: ["Northern"] },
-  { id: '940GZZLUMRH', name: "Marylebone", lines: ["Bakerloo"] },
-  { id: '940GZZLUMRD', name: "Mile End", lines: ["Central","District","Hammersmith & City"] },
-  { id: '940GZZLUNHG', name: "Notting Hill Gate", lines: ["Central","Circle","District"] },
-  { id: '940GZZLUPVL', name: "Pimlico", lines: ["Victoria"] },
-  { id: '940GZZLUSDS', name: "St Paul's", lines: ["Central"] },
-  { id: '940GZZLUTBN', name: "Tooting Bec", lines: ["Northern"] },
-  { id: '940GZZLUTBY', name: "Tooting Broadway", lines: ["Northern"] },
-  { id: '940GZZLUWJN', name: "Wembley Central", lines: ["Bakerloo","Overground"] },
-  { id: '940GZZLUWSM', name: "Westminster", lines: ["Circle","District","Jubilee"] },
-];
-
-const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-// JS getDay() returns 0=Sun,1=Mon...6=Sat; map to our index
-const JS_DAY_MAP = [6,0,1,2,3,4,5]; // [Sun,Mon,Tue,Wed,Thu,Fri,Sat] -> our index
-
-// ── STATE ─────────────────────────────────────────────────
-let selectedLines = new Set();
-let savedStations = [];
-let timeWindows = [];
-let activeDays = new Set([0,1,2,3,4]); // Mon-Fri default
-let notifEnabled = false;
-let notifInterval = null;
-let savedRoutes = [];
-
-// ── PERSISTENCE ───────────────────────────────────────────
-function save() {
-  try {
-    localStorage.setItem('mc_lines', JSON.stringify([...selectedLines]));
-    localStorage.setItem('mc_stations', JSON.stringify(savedStations));
-    localStorage.setItem('mc_times', JSON.stringify(timeWindows));
-    localStorage.setItem('mc_days', JSON.stringify([...activeDays]));
-    localStorage.setItem('mc_notif', notifEnabled ? '1' : '0');
-    localStorage.setItem('mc_routes', JSON.stringify(savedRoutes));
-  } catch(e) {}
-}
-function load() {
-  try {
-    const l = localStorage.getItem('mc_lines'); if (l) JSON.parse(l).forEach(x => selectedLines.add(x));
-    const s = localStorage.getItem('mc_stations'); if (s) savedStations = JSON.parse(s);
-    const t = localStorage.getItem('mc_times'); if (t) timeWindows = JSON.parse(t);
-    const d = localStorage.getItem('mc_days'); if (d) { activeDays = new Set(JSON.parse(d)); }
-    const n = localStorage.getItem('mc_notif'); if (n) notifEnabled = n === '1';
-    const r = localStorage.getItem('mc_routes'); if (r) savedRoutes = JSON.parse(r);
-    const th = localStorage.getItem('theme'); if (th) applyTheme(th);
-  } catch(e) {}
-}
-
-// ── THEME ─────────────────────────────────────────────────
-function applyTheme(t) {
-  document.body.setAttribute('data-theme', t);
-  const isDark = t === 'dark';
-  document.getElementById('themeToggle').textContent = isDark ? '☀️' : '🌙';
-  document.getElementById('themeIcon').textContent = isDark ? '☀️' : '🌙';
-  document.getElementById('themeLabel').textContent = isDark ? 'Light mode' : 'Dark mode';
-}
-function toggleTheme() {
-  const cur = document.body.getAttribute('data-theme');
-  const next = cur === 'dark' ? 'light' : 'dark';
-  applyTheme(next); localStorage.setItem('theme', next);
-}
-
-// ── NAVIGATION ────────────────────────────────────────────
-function openSidebar() {
-  document.getElementById('sidebar').classList.add('open');
-  document.getElementById('sidebarOverlay').classList.add('open');
-}
-function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebarOverlay').classList.remove('open');
-}
-function navigateTo(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.sidebar-item[id^="nav-"]').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
-  document.getElementById('nav-' + page).classList.add('active');
-  if (page === 'routes') renderRouteList();
-  closeSidebar();
-}
-
-// ── TABS ──────────────────────────────────────────────────
-function switchTab(name, btn) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-  document.getElementById('panel-' + name).classList.add('active');
-  btn.classList.add('active');
-}
-
-// ── LINES ─────────────────────────────────────────────────
-function buildLineGrid() {
-  const grid = document.getElementById('lineGrid');
-  grid.innerHTML = '';
-  LINES.forEach(line => {
-    const btn = document.createElement('button');
-    btn.className = 'line-btn' + (selectedLines.has(line.id) ? ' selected' : '');
-    btn.style.setProperty('--line-color', line.color);
-    btn.innerHTML = `<span class="line-dot" style="background:${line.color}"></span>${line.name}`;
-    btn.onclick = () => toggleLine(line.id, btn);
-    grid.appendChild(btn);
-  });
-}
-function toggleLine(id, btn) {
-  if (selectedLines.has(id)) { selectedLines.delete(id); btn.classList.remove('selected'); }
-  else { selectedLines.add(id); btn.classList.add('selected'); }
-  save();
-}
-
-// ── STATIONS ──────────────────────────────────────────────
-function onStationSearch() {
-  const q = document.getElementById('stationSearch').value.trim().toLowerCase();
-  const box = document.getElementById('searchResults');
-  if (q.length < 2) { box.classList.remove('show'); box.innerHTML = ''; return; }
-  const matches = ALL_STATIONS.filter(s => s.name.toLowerCase().includes(q)).slice(0, 8);
-  if (!matches.length) { box.innerHTML = '<div class="search-result-item"><div class="result-name" style="color:var(--muted)">No stations found</div></div>'; box.classList.add('show'); return; }
-  box.innerHTML = matches.map(s => `<div class="search-result-item" onclick="addStation('${s.id}','${s.name.replace(/'/g,"\\'")}','${s.lines.join(",")}')"><div class="result-name">${s.name}</div><div class="result-lines-tag">${s.lines.join(' · ')}</div></div>`).join('');
-  box.classList.add('show');
-}
-function addStation(id, name, linesStr) {
-  if (savedStations.find(s => s.id === id)) { closeSearch(); return; }
-  savedStations.push({ id, name, lines: linesStr.split(',') });
-  save(); renderSavedStations(); closeSearch();
-}
-function closeSearch() {
-  document.getElementById('stationSearch').value = '';
-  document.getElementById('searchResults').classList.remove('show');
-  document.getElementById('searchResults').innerHTML = '';
-}
-function removeStation(id) { savedStations = savedStations.filter(s => s.id !== id); save(); renderSavedStations(); }
-function renderSavedStations() {
-  const el = document.getElementById('savedStations');
-  if (!savedStations.length) { el.innerHTML = '<div class="empty-stations">No stations saved yet — search above</div>'; return; }
-  el.innerHTML = savedStations.map(s => `
-    <div class="saved-station-chip">
-      <div class="chip-left">
-        <div class="chip-name">${s.name}</div>
-        <div class="chip-lines">${s.lines.join(' · ')}</div>
-      </div>
-      <button class="chip-remove" onclick="removeStation('${s.id}')">×</button>
-    </div>`).join('');
-}
-
-// ── DAYS ──────────────────────────────────────────────────
-function buildDaysGrid() {
-  const grid = document.getElementById('daysGrid');
-  grid.innerHTML = '';
-  DAYS.forEach((day, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'day-btn' + (activeDays.has(i) ? ' selected' : '');
-    btn.textContent = day;
-    btn.onclick = () => toggleDay(i, btn);
-    grid.appendChild(btn);
-  });
-}
-function toggleDay(i, btn) {
-  if (activeDays.has(i)) { activeDays.delete(i); btn.classList.remove('selected'); }
-  else { activeDays.add(i); btn.classList.add('selected'); }
-  save();
-}
-
-// ── TIMES ─────────────────────────────────────────────────
-function addTimeWindow(fw) {
-  const w = fw || { fromH: 7, fromM: 0, toH: 9, toM: 30 };
-  timeWindows.push(w); save(); renderTimeWindows();
-}
-function removeTimeWindow(i) { timeWindows.splice(i, 1); save(); renderTimeWindows(); }
-function renderTimeWindows() {
-  const el = document.getElementById('timeWindows');
-  if (!timeWindows.length) { el.innerHTML = ''; return; }
-  el.innerHTML = timeWindows.map((w, i) => `
-    <div class="time-window-row">
-      <div class="tw-inner">
-        <span class="tw-label">from</span>
-        <div class="tw-picker">${makeHSelect(w.fromH,i,'fromH')}<span class="tw-sep">:</span>${makeMSelect(w.fromM,i,'fromM')}</div>
-        <span class="tw-arrow">→</span>
-        <div class="tw-picker">${makeHSelect(w.toH,i,'toH')}<span class="tw-sep">:</span>${makeMSelect(w.toM,i,'toM')}</div>
-      </div>
-      ${timeWindows.length > 1 ? `<button class="tw-remove" onclick="removeTimeWindow(${i})">×</button>` : ''}
-    </div>`).join('');
-}
-function makeHSelect(val, idx, field) {
-  let o = '';
-  for (let h=0;h<=23;h++) o+=`<option value="${h}" ${h==val?'selected':''}>${String(h).padStart(2,'0')}</option>`;
-  return `<select onchange="updateTW(${idx},'${field}',this.value)">${o}</select>`;
-}
-function makeMSelect(val, idx, field) {
-  let o = '';
-  for (let m=0;m<=55;m+=5) o+=`<option value="${m}" ${m==val?'selected':''}>${String(m).padStart(2,'0')}</option>`;
-  return `<select onchange="updateTW(${idx},'${field}',this.value)">${o}</select>`;
-}
-function updateTW(idx, field, val) { timeWindows[idx][field] = parseInt(val); save(); }
-
-// ── WINDOW + DAY CHECK ────────────────────────────────────
-function isInWindowAndDay() {
-  const now = new Date();
-  const todayIdx = JS_DAY_MAP[now.getDay()]; // 0=Mon..6=Sun
-  if (!activeDays.has(todayIdx)) return false;
-  if (!timeWindows.length) return false;
-  const nowMins = now.getHours()*60+now.getMinutes();
-  return timeWindows.some(w => nowMins >= (w.fromH*60+w.fromM) && nowMins <= (w.toH*60+w.toM));
-}
-
-// ── NOTIFICATIONS ─────────────────────────────────────────
-function toggleNotifications() {
-  notifEnabled = document.getElementById('notifToggle').checked; save();
-  if (notifEnabled) {
-    if ('Notification' in window && Notification.permission !== 'granted') {
-      Notification.requestPermission().then(p => {
-        if (p !== 'granted') showNotifAlert('⚠️ Notifications blocked. Check your browser settings.');
-        else { showNotifAlert('✅ <strong>Alerts enabled!</strong> Keep this page open.'); startPolling(); }
-      });
-    } else { showNotifAlert('✅ <strong>Alerts enabled!</strong> Keep this page open.'); startPolling(); }
-  } else { stopPolling(); document.getElementById('notifAlert').classList.remove('show'); }
-}
-function showNotifAlert(msg) { const el = document.getElementById('notifAlert'); el.innerHTML = msg; el.classList.add('show'); }
-function startPolling() { stopPolling(); notifInterval = setInterval(async () => { if (!isInWindowAndDay()) return; await silentCheck(); }, 5*60*1000); }
-function stopPolling() { if (notifInterval) clearInterval(notifInterval); notifInterval = null; }
-
-// ── SEVERITY ──────────────────────────────────────────────
-function severityClass(desc) {
-  if (!desc) return 'good';
-  const d = desc.toLowerCase();
-  if (d.includes('good service') || d.includes('special service')) return 'good';
-  if (d.includes('minor delay') || d.includes('reduced service') || d.includes('part suspension') || d.includes('part closure') || d.includes('planned closure')) return 'minor';
-  return 'bad';
-}
-
-// ── SILENT CHECK (background polling) ─────────────────────
-async function silentCheck() {
-  try {
-    const results = await fetchAllStatus();
-    const problems = results.filter(r => r.cls !== 'good');
-    if (problems.length && 'Notification' in window && Notification.permission === 'granted') {
-      // One notification per problem
-      problems.forEach(p => {
-        new Notification(`⚠️ ${p.name}`, {
-          body: p.reason || p.statusText,
-          icon: 'https://via.placeholder.com/192/7c6af7/ffffff?text=C'
-        });
-      });
-    }
-  } catch(e) {}
-}
-
-// ── FETCH ALL STATUS ───────────────────────────────────────
-async function fetchAllStatus() {
-  const results = [];
-  if (selectedLines.size > 0) {
-    const ids = [...selectedLines].join(',');
-    const res = await fetch(`https://api.tfl.gov.uk/Line/${encodeURIComponent(ids)}/Status`);
-    if (res.ok) {
-      const data = await res.json();
-      data.forEach(line => {
-        const lineInfo = LINES.find(l => l.id === line.id) || {};
-        const statusObj = line.lineStatuses?.[0] || {};
-        const statusText = statusObj.statusSeverityDescription || 'Unknown';
-        const reason = (statusObj.reason || '').replace(/^[^:]+:\s*/i, '');
-        results.push({ name: line.name, type: 'line', color: lineInfo.color || '#888', statusText, reason, cls: severityClass(statusText) });
-      });
-    }
-  }
-  for (const station of savedStations) {
-    try {
-      const res = await fetch(`https://api.tfl.gov.uk/StopPoint/${station.id}/Disruption`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.length > 0) {
-          results.push({ name: station.name, type: 'station', color: '#7c6af7', statusText: data[0].categoryDescription || 'Disruption', reason: data[0].description || '', cls: 'bad' });
-        } else {
-          results.push({ name: station.name, type: 'station', color: '#7c6af7', statusText: 'No disruptions', reason: '', cls: 'good' });
-        }
-      }
-    } catch(e) { results.push({ name: station.name, type: 'station', color: '#7c6af7', statusText: 'Check failed', reason: '', cls: 'minor' }); }
-  }
-  return results;
-}
-
-// ── CHECK STATUS (manual) ─────────────────────────────────
-async function checkStatus() {
-  if (selectedLines.size === 0 && savedStations.length === 0) { alert('Please select at least one line or station first.'); return; }
-  const btn = document.getElementById('checkBtn');
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Checking…';
-  const resultsEl = document.getElementById('results');
-  const section = document.getElementById('resultsSection');
-  resultsEl.innerHTML = ''; section.style.display = 'none';
-  try {
-    const allResults = await fetchAllStatus();
-    const container = document.createElement('div');
-    container.className = 'results';
-    allResults.forEach((r, i) => {
-      const card = document.createElement('div');
-      card.className = `status-card ${r.cls}`;
-      card.style.animationDelay = `${i*0.05}s`;
-      card.innerHTML = `<div class="card-bar" style="background:${r.color}"></div><div class="card-body"><div class="card-header"><div><div class="card-name">${r.name}</div><div class="card-type">${r.type}</div></div><span class="status-badge">${r.statusText}</span></div>${r.reason?`<div class="card-reason">${r.reason}</div>`:''}</div>`;
-      container.appendChild(card);
-    });
-    resultsEl.innerHTML = ''; resultsEl.appendChild(container);
-    document.getElementById('resultsHeader').textContent = `${allResults.length} result${allResults.length!==1?'s':''}`;
-    document.getElementById('meta').textContent = `Last checked ${new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})} · Live TfL data`;
-    section.style.display = 'block';
-  } catch(err) {
-    resultsEl.innerHTML = `<div class="empty-state">⚠️ Couldn't reach TfL API.<br><small>${err.message}</small></div>`;
-    section.style.display = 'block';
-  } finally {
-    btn.disabled = false; btn.textContent = 'Check Commute';
-  }
-}
-
-// ── TEST NOTIFICATION ─────────────────────────────────────
-async function testFullNotification() {
-  if (!('Notification' in window) || Notification.permission !== 'granted') { alert("Please enable notifications first in the Times tab."); return; }
-  if (selectedLines.size === 0 && savedStations.length === 0) { alert('Please select at least one line or station first.'); return; }
-  showNotifAlert('🔍 Checking status…');
-  try {
-    const results = await fetchAllStatus();
-    const problems = results.filter(r => r.cls !== 'good');
-    if (problems.length) {
-      problems.forEach(p => {
-        new Notification(`⚠️ ${p.name}`, { body: p.reason || p.statusText, icon: 'https://via.placeholder.com/192/7c6af7/ffffff?text=C' });
-      });
-    } else {
-      new Notification('✅ Commute clear', { body: results.map(r => `${r.name}: ${r.statusText}`).join('\n'), icon: 'https://via.placeholder.com/192/7c6af7/ffffff?text=C' });
-    }
-    showNotifAlert('✅ Notification sent!');
-  } catch(err) { new Notification('Commute', { body: 'Could not fetch live data.' }); }
-}
-
-// ── SAVE ROUTE MODAL ──────────────────────────────────────
-function openSaveModal() {
-  if (selectedLines.size === 0 && savedStations.length === 0) { alert('Add some lines or stations first before saving a route.'); return; }
-  document.getElementById('routeNameInput').value = '';
-  document.getElementById('saveModal').classList.add('open');
-  setTimeout(() => document.getElementById('routeNameInput').focus(), 100);
-}
-function closeSaveModal() { document.getElementById('saveModal').classList.remove('open'); }
-function saveRoute() {
-  const name = document.getElementById('routeNameInput').value.trim();
-  if (!name) { document.getElementById('routeNameInput').focus(); return; }
-  const route = {
-    id: Date.now(),
-    name,
-    lines: [...selectedLines],
-    stations: JSON.parse(JSON.stringify(savedStations)),
-    timeWindows: JSON.parse(JSON.stringify(timeWindows)),
-    activeDays: [...activeDays],
-    created: new Date().toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })
-  };
-  savedRoutes.unshift(route);
-  save(); closeSaveModal();
-  showNotifAlert(`✅ Route "<strong>${name}</strong>" saved! Find it in Saved Routes.`);
-}
-
-// ── LOAD ROUTE ────────────────────────────────────────────
-function loadRoute(id) {
-  const route = savedRoutes.find(r => r.id === id);
-  if (!route) return;
-  selectedLines = new Set(route.lines);
-  savedStations = JSON.parse(JSON.stringify(route.stations));
-  timeWindows = JSON.parse(JSON.stringify(route.timeWindows));
-  activeDays = new Set(route.activeDays);
-  save();
-  buildLineGrid(); renderSavedStations(); renderTimeWindows(); buildDaysGrid();
-  navigateTo('home');
-  showNotifAlert(`✅ Route "<strong>${route.name}</strong>" loaded.`);
-}
-function deleteRoute(id) {
-  if (!confirm('Delete this saved route?')) return;
-  savedRoutes = savedRoutes.filter(r => r.id !== id);
-  save(); renderRouteList();
-}
-
-// ── RENDER ROUTES PAGE ────────────────────────────────────
-function renderRouteList() {
-  const el = document.getElementById('routeList');
-  if (!savedRoutes.length) {
-    el.innerHTML = `<div class="empty-routes"><div class="er-icon">🗺️</div><p>No saved routes yet.<br>Set up your lines, stations and times on the Home tab, then tap <strong>Save as Route</strong>.</p></div>`;
-    return;
-  }
-  el.innerHTML = savedRoutes.map(r => {
-    const lineNames = r.lines.map(id => LINES.find(l => l.id === id)?.name || id);
-    const dayNames = r.activeDays.map(i => DAYS[i]);
-    const tags = [
-      ...lineNames.map(n => `<span class="route-tag">${n}</span>`),
-      ...r.stations.map(s => `<span class="route-tag">📍 ${s.name}</span>`),
-      ...dayNames.map(d => `<span class="route-tag day">${d}</span>`),
-    ].join('');
-    return `
-      <div class="route-card" onclick="loadRoute(${r.id})">
-        <div class="route-card-header">
-          <div class="route-name">${r.name}</div>
-          <div class="route-actions" onclick="event.stopPropagation()">
-            <button class="route-action-btn" title="Load" onclick="loadRoute(${r.id})">↩</button>
-            <button class="route-action-btn delete" title="Delete" onclick="deleteRoute(${r.id})">×</button>
-          </div>
+  <main>
+    <section id="home" class="tab-panel active" aria-labelledby="home-heading">
+      <div class="hero">
+        <div>
+          <p class="eyebrow">TfL live status</p>
+          <h1 id="home-heading">Your commute, checked before you leave.</h1>
+          <p>Build a route profile, get live disruption checks, journey estimates, quieter notifications and local reliability history.</p>
         </div>
-        <div class="route-meta-row">${tags}</div>
-      </div>`;
-  }).join('');
-}
+        <div class="status-card" id="summaryCard">
+          <span class="pulse"></span>
+          <strong>Ready to check</strong>
+          <small id="lastChecked">Last checked: never</small>
+        </div>
+      </div>
 
-// ── INIT ──────────────────────────────────────────────────
-load();
-buildLineGrid();
-renderSavedStations();
-buildDaysGrid();
-if (!timeWindows.length) addTimeWindow({ fromH: 7, fromM: 0, toH: 9, toM: 30 });
-else renderTimeWindows();
-document.getElementById('notifToggle').checked = notifEnabled;
-if (notifEnabled) startPolling();
-</script>
+      <section class="card">
+        <div class="section-heading">
+          <div><h2>Route profile</h2><p>Pick an origin, destination and preferred lines.</p></div>
+          <button id="swapStations" class="ghost" type="button">Swap</button>
+        </div>
+        <div class="grid two">
+          <label>From
+            <input id="fromSearch" type="search" placeholder="Search origin station" autocomplete="off" />
+            <div id="fromResults" class="search-results"></div>
+          </label>
+          <label>To
+            <input id="toSearch" type="search" placeholder="Search destination station" autocomplete="off" />
+            <div id="toResults" class="search-results"></div>
+          </label>
+        </div>
+        <div class="selected-route" id="selectedRoute"></div>
+      </section>
+
+      <section class="card">
+        <div class="section-heading"><div><h2>Preferred lines</h2><p>Used for route cards and disruption alerts.</p></div></div>
+        <div id="linePicker" class="line-picker skeleton-list"></div>
+      </section>
+
+      <section class="card">
+        <div class="section-heading">
+          <div><h2>Live commute check</h2><p>Disruptions, best route estimate and alternatives.</p></div>
+          <button id="checkNow" class="primary" type="button">Check commute</button>
+        </div>
+        <div id="journeySummary" class="journey-summary empty-state">Choose stations, then check your commute.</div>
+        <div id="statusResults" class="status-results"></div>
+      </section>
+
+      <section class="card">
+        <div class="section-heading"><div><h2>Save this route</h2><p>Routes include stations, lines, alert windows and active days.</p></div></div>
+        <div class="inline-form">
+          <input id="routeName" type="text" placeholder="e.g. Home to UMG" />
+          <button id="saveRoute" type="button" class="primary">Save route</button>
+        </div>
+      </section>
+    </section>
+
+    <section id="routes" class="tab-panel" aria-labelledby="routes-heading">
+      <section class="card">
+        <div class="section-heading"><div><h2 id="routes-heading">Saved routes</h2><p>Tap a route to load it.</p></div></div>
+        <div id="routesList" class="route-list empty-state">No saved routes yet.</div>
+      </section>
+    </section>
+
+    <section id="history" class="tab-panel" aria-labelledby="history-heading">
+      <section class="card">
+        <div class="section-heading">
+          <div><h2 id="history-heading">Reliability history</h2><p>Local-only snapshots from your recent checks.</p></div>
+          <button id="clearHistory" class="danger" type="button">Clear history</button>
+        </div>
+        <div id="historyStats" class="stats-grid"></div>
+        <div id="historyList" class="history-list empty-state">No checks recorded yet.</div>
+      </section>
+    </section>
+
+    <section id="settings" class="tab-panel" aria-labelledby="settings-heading">
+      <section class="card">
+        <div class="section-heading"><div><h2 id="settings-heading">Alerts</h2><p>Page-based alerts with status-change dedupe and snooze.</p></div></div>
+        <div class="grid two">
+          <label class="switch-row"><span>Enable notifications</span><input id="alertsEnabled" type="checkbox" /></label>
+          <label>Check every
+            <select id="pollInterval">
+              <option value="300000">5 minutes</option>
+              <option value="600000">10 minutes</option>
+              <option value="900000">15 minutes</option>
+            </select>
+          </label>
+          <label>Quiet hours start<input id="quietStart" type="time" value="22:00" /></label>
+          <label>Quiet hours end<input id="quietEnd" type="time" value="07:00" /></label>
+        </div>
+        <div class="section-heading compact"><div><h3>Alert windows</h3></div><button id="addWindow" class="ghost" type="button">Add window</button></div>
+        <div id="windowsList" class="windows-list"></div>
+        <div class="section-heading compact"><div><h3>Active days</h3></div></div>
+        <div id="dayPicker" class="day-picker"></div>
+        <div class="button-row">
+          <button id="testNotification" class="ghost" type="button">Test notification</button>
+          <button id="installApp" class="primary hidden" type="button">Install app</button>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="src/app.js"></script>
 </body>
 </html>
