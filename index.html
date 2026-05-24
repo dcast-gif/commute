@@ -483,29 +483,29 @@ function testNotification() {
     });
   }
 }
+
 async function testFullNotification() {
   if (!('Notification' in window) || Notification.permission !== 'granted') {
     alert("Please enable notifications first");
     return;
   }
 
-  showNotifAlert('🔍 Checking status for notification...');
+  showNotifAlert('🔍 Checking status...');
   
   try {
-    // Run the actual status check
     const hasLines = selectedLines.size > 0;
     const hasStations = savedStations.length > 0;
     
     if (!hasLines && !hasStations) {
       new Notification('My Commute', { 
-        body: 'Please select some lines or stations first!' 
+        body: 'Please select lines or stations first.' 
       });
       return;
     }
 
-    let message = "Commute Status:\n";
-    
-    // Check lines
+    let body = "";
+
+    // Lines
     if (hasLines) {
       const ids = [...selectedLines].join(',');
       const res = await fetch(`https://api.tfl.gov.uk/Line/${encodeURIComponent(ids)}/Status`);
@@ -513,29 +513,46 @@ async function testFullNotification() {
         const data = await res.json();
         data.forEach(line => {
           const status = line.lineStatuses?.[0]?.statusSeverityDescription || 'Unknown';
-          message += `• ${line.name}: ${status}\n`;
+          body += `• ${line.name}: ${status}\n`;
         });
       }
     }
 
-    // Check stations
+    // Stations
     if (hasStations) {
-      message += "\nStations:\n";
+      body += "\nStations:\n";
+      let hasDisruption = false;
+      
       for (const station of savedStations) {
-        message += `• ${station.name}: OK\n`;
+        try {
+          const res = await fetch(`https://api.tfl.gov.uk/StopPoint/${station.id}/Disruption`);
+          if (res.ok) {
+            const disruptions = await res.json();
+            if (disruptions.length > 0) {
+              const desc = disruptions[0].categoryDescription || disruptions[0].description || "Disruption";
+              body += `• ${station.name}: ${desc}\n`;
+              hasDisruption = true;
+            }
+          }
+        } catch(e) {}
+      }
+      
+      if (!hasDisruption) {
+        body += "• No closures or disruptions\n";
       }
     }
 
-    // Send the notification
-    new Notification('🚇 My Commute Now', {
-      body: message.length > 200 ? message.substring(0, 180) + '...' : message,
+    new Notification('My Commute', {
+      body: body.trim(),
       icon: 'https://via.placeholder.com/192/7c6af7/ffffff?text=C'
     });
 
-    showNotifAlert('✅ Status notification sent!');
+    showNotifAlert('✅ Notification sent!');
 
   } catch (err) {
-    new Notification('My Commute', { body: 'Could not fetch live status right now.' });
+    new Notification('My Commute', { 
+      body: 'Could not fetch live data right now.' 
+    });
   }
 }
 load();
