@@ -1,66 +1,228 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Commute · TfL Status</title>
-  
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0a0a0f">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <link rel="apple-touch-icon" href="https://via.placeholder.com/192/7c6af7/ffffff?text=C">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commute · TfL Status</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="apple-touch-icon" href="https://via.placeholder.com/192/7c6af7/ffffff?text=C">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f; --surface: #12121a; --surface2: #1a1a26; --border: #1e1e2e; --border2: #2a2a3e;
+  --text: #e8e8f0; --muted: #5a5a7a; --accent: #7c6af7;
+  --good: #22c55e; --warn: #f59e0b; --bad: #ef4444;
+  --good-bg: rgba(34,197,94,0.08); --warn-bg: rgba(245,158,11,0.08); --bad-bg: rgba(239,68,68,0.08);
+  --radius: 12px;
+}
+[data-theme="light"] {
+  --bg: #f4f4f8; --surface: #ffffff; --surface2: #ededf3; --border: #e0e0ec; --border2: #d0d0e0;
+  --text: #1a1a2e; --muted: #7070a0; --accent: #6f42c1;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; padding: 1.5rem 1rem 3rem; transition: background 0.3s; }
+body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse 60% 40% at 70% 20%, rgba(124,106,247,0.07) 0%, transparent 60%), radial-gradient(ellipse 40% 50% at 10% 80%, rgba(34,197,94,0.04) 0%, transparent 60%); pointer-events: none; z-index: 0; }
+.container { max-width: 640px; margin: 0 auto; position: relative; z-index: 1; }
 
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
-  
-  <style>
-    :root {
-      --bg: #0a0a0f; --surface: #12121a; --surface2: #1a1a26; --border: #1e1e2e; --border2: #2a2a3e;
-      --text: #e8e8f0; --muted: #5a5a7a; --accent: #7c6af7;
-      --good: #22c55e; --warn: #f59e0b; --bad: #ef4444;
-      --good-bg: rgba(34,197,94,0.08); --warn-bg: rgba(245,158,11,0.08); --bad-bg: rgba(239,68,68,0.08);
-    }
+/* HEADER */
+header { margin-bottom: 1.8rem; display: flex; justify-content: space-between; align-items: flex-start; }
+.eyebrow { font-family: 'Space Mono', monospace; font-size: 0.62rem; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase; margin-bottom: 0.4rem; }
+h1 { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; line-height: 1.1; background: linear-gradient(135deg, var(--text) 30%, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.theme-toggle { background: var(--surface2); border: 1px solid var(--border); width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; cursor: pointer; flex-shrink: 0; }
 
-    [data-theme="light"] {
-      --bg: #f8f9fa; --surface: #ffffff; --surface2: #f1f3f5; --border: #e9ecef; --border2: #dee2e6;
-      --text: #212529; --muted: #6c757d; --accent: #6f42c1;
-    }
+/* TABS */
+.tab-bar { display: flex; gap: 0.4rem; margin-bottom: 1.2rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 0.3rem; }
+.tab { flex: 1; padding: 0.55rem; border-radius: 9px; border: none; background: transparent; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.tab.active { background: var(--accent); color: #fff; }
+.panel { display: none; }
+.panel.active { display: block; }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; padding: 1.5rem 1rem 3rem; transition: background 0.4s ease; }
-    body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse 60% 40% at 70% 20%, rgba(124,106,247,0.07) 0%, transparent 60%), radial-gradient(ellipse 40% 50% at 10% 80%, rgba(34,197,94,0.04) 0%, transparent 60%); pointer-events: none; z-index: 0; }
+/* SECTION CARDS */
+.section-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.2rem; margin-bottom: 1rem; }
 
-    .container { max-width: 640px; margin: 0 auto; position: relative; z-index: 1; }
-    header { margin-bottom: 1.8rem; display: flex; justify-content: space-between; align-items: flex-start; }
-    .eyebrow { font-family: 'Space Mono', monospace; font-size: 0.62rem; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase; margin-bottom: 0.4rem; }
-    h1 { font-size: 2rem; font-weight: 800; line-height: 1.1; background: linear-gradient(135deg, var(--text) 30%, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+/* Section label — small, tasteful, not a giant h2 */
+.section-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.9rem;
+  font-weight: 400;
+}
 
-    .theme-toggle { background: var(--surface2); border: 1px solid var(--border); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; cursor: pointer; }
+/* LINES */
+.line-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.45rem; margin-bottom: 0.2rem; }
+.line-btn { display: flex; align-items: center; gap: 0.5rem; padding: 0.55rem 0.8rem; border-radius: 9px; border: 1.5px solid var(--border); background: transparent; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.15s; text-align: left; width: 100%; }
+.line-btn.selected { border-color: var(--line-color, var(--accent)); background: color-mix(in srgb, var(--line-color, var(--accent)) 12%, transparent); color: var(--text); font-weight: 600; }
+.line-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 
-    .tab-bar { display: flex; gap: 0.4rem; margin-bottom: 1.2rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 0.3rem; }
-    .tab { flex: 1; padding: 0.55rem; border-radius: 9px; border: none; background: transparent; color: var(--muted); font-weight: 700; cursor: pointer; }
-    .tab.active { background: var(--accent); color: #fff; }
+/* STATIONS */
+.search-input { width: 100%; background: var(--surface2); border: 1.5px solid var(--border2); border-radius: 10px; padding: 0.7rem 0.9rem; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; outline: none; transition: border-color 0.15s; margin-bottom: 0.6rem; }
+.search-input:focus { border-color: var(--accent); }
+.search-input::placeholder { color: var(--muted); }
 
-    .panel { display: none; }
-    .panel.active { display: block; }
-    .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.3rem; margin-bottom: 1rem; }
+/* Search results — dropdown style */
+.search-results { background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; overflow: hidden; margin-bottom: 0.8rem; display: none; }
+.search-results.show { display: block; }
+.search-result-item { padding: 0.7rem 0.9rem; cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.1s; }
+.search-result-item:last-child { border-bottom: none; }
+.search-result-item:active { background: var(--border); }
+.result-name { font-size: 0.88rem; font-weight: 500; color: var(--text); }
+.result-lines-tag { font-size: 0.68rem; color: var(--muted); font-family: 'Space Mono', monospace; margin-top: 0.15rem; }
 
-    .line-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.45rem; margin-bottom: 1rem; justify-items: center; }
-    .line-btn { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.7rem; border-radius: 8px; border: 1.5px solid var(--border); background: transparent; color: var(--muted); font-weight: 600; cursor: pointer; text-align: center; justify-content: center; width: 100%; }
-    .line-btn.selected { border-color: var(--line-color, var(--accent)); background: color-mix(in srgb, var(--line-color, var(--accent)) 12%, transparent); color: var(--text); }
+/* Saved station chips — same style as line buttons, left-aligned, dynamic width */
+.saved-stations { display: flex; flex-direction: column; gap: 0.4rem; }
+.saved-station-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.55rem 0.5rem 0.55rem 0.85rem;
+  border-radius: 9px;
+  border: 1.5px solid var(--border2);
+  background: var(--surface2);
+  transition: border-color 0.15s;
+}
+.saved-station-chip:hover { border-color: var(--accent); }
+.chip-left { display: flex; flex-direction: column; min-width: 0; }
+.chip-name { font-size: 0.88rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chip-lines { font-size: 0.65rem; color: var(--muted); font-family: 'Space Mono', monospace; margin-top: 0.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chip-remove {
+  flex-shrink: 0;
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s;
+  line-height: 1;
+}
+.chip-remove:hover { background: var(--bad); border-color: var(--bad); color: #fff; }
 
-    .check-btn { width: 100%; padding: 0.85rem; border-radius: 10px; border: none; background: var(--accent); color: #fff; font-weight: 700; cursor: pointer; margin-top: 0.2rem; }
-    .check-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+.empty-stations { color: var(--muted); font-size: 0.82rem; padding: 0.5rem 0; }
 
-    .notif-alert { background: rgba(124,106,247,0.12); border: 1px solid rgba(124,106,247,0.3); border-radius: 12px; padding: 0.9rem 1rem; margin-bottom: 1rem; font-size: 0.82rem; line-height: 1.5; color: var(--text); display: none; }
-    .notif-alert.show { display: block; }
-  </style>
+/* TIMES — clean card rows */
+.time-windows { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.8rem; }
+.time-window-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--surface2);
+  border: 1.5px solid var(--border2);
+  border-radius: 10px;
+  padding: 0.6rem 0.8rem;
+}
+.tw-inner { display: flex; align-items: center; gap: 0.35rem; flex: 1; }
+.tw-label { font-family: 'Space Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; width: 24px; flex-shrink: 0; }
+.tw-picker { display: flex; align-items: center; gap: 0.2rem; }
+.tw-picker select {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+  font-size: 0.88rem;
+  padding: 0.25rem 0.3rem;
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  text-align: center;
+}
+.tw-picker select option { background: var(--surface2); }
+.tw-sep { font-family: 'Space Mono', monospace; color: var(--muted); font-size: 0.9rem; }
+.tw-arrow { color: var(--muted); font-size: 0.75rem; padding: 0 0.1rem; flex-shrink: 0; }
+.tw-remove {
+  flex-shrink: 0;
+  width: 26px; height: 26px;
+  border-radius: 6px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s;
+  margin-left: auto;
+}
+.tw-remove:hover { background: var(--bad); border-color: var(--bad); color: #fff; }
+
+.add-time-btn {
+  display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: 10px;
+  border: 1.5px dashed var(--border2);
+  background: transparent;
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.add-time-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* NOTIFICATIONS toggle */
+.notif-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.7rem; }
+.notif-label { font-size: 0.9rem; font-weight: 500; }
+.toggle { position: relative; width: 44px; height: 24px; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; inset: 0; background: var(--border2); border-radius: 24px; cursor: pointer; transition: background 0.2s; }
+.toggle-slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform 0.2s; }
+.toggle input:checked + .toggle-slider { background: var(--accent); }
+.toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+.notif-note { font-size: 0.78rem; color: var(--muted); line-height: 1.55; }
+
+/* NOTIFICATION ALERT BANNER */
+.notif-alert { background: rgba(124,106,247,0.1); border: 1px solid rgba(124,106,247,0.25); border-radius: 12px; padding: 0.75rem 1rem; margin-bottom: 1rem; font-size: 0.84rem; line-height: 1.5; color: var(--text); display: none; font-family: 'DM Sans', sans-serif; }
+.notif-alert.show { display: block; }
+.notif-alert strong { color: var(--accent); }
+
+/* BUTTONS */
+.check-btn { width: 100%; padding: 0.85rem; border-radius: 11px; border: none; background: var(--accent); color: #fff; font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 600; cursor: pointer; transition: opacity 0.15s, transform 0.12s; margin-top: 0.3rem; letter-spacing: 0.01em; }
+.check-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.check-btn:active { transform: translateY(0); }
+.check-btn:disabled { opacity: 0.45; cursor: default; transform: none; }
+
+/* RESULTS */
+.results-section { margin-top: 1rem; }
+.results-header { font-family: 'Space Mono', monospace; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.7rem; }
+.results { display: flex; flex-direction: column; gap: 0.6rem; }
+.status-card { border-radius: 13px; border: 1px solid var(--border); padding: 0.9rem 1.1rem; display: flex; align-items: flex-start; gap: 0.9rem; animation: slideIn 0.25s ease both; }
+@keyframes slideIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+.status-card.good  { background: var(--good-bg); border-color: rgba(34,197,94,0.2); }
+.status-card.minor { background: var(--warn-bg); border-color: rgba(245,158,11,0.25); }
+.status-card.bad   { background: var(--bad-bg);  border-color: rgba(239,68,68,0.25); }
+.card-bar { width: 3px; border-radius: 4px; align-self: stretch; flex-shrink: 0; min-height: 24px; }
+.card-body { flex: 1; min-width: 0; }
+.card-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.15rem; flex-wrap: wrap; }
+.card-name { font-size: 0.92rem; font-weight: 600; }
+.card-type { font-family: 'Space Mono', monospace; font-size: 0.56rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+.status-badge { font-family: 'Space Mono', monospace; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.18em 0.55em; border-radius: 4px; white-space: nowrap; }
+.good  .status-badge { background: rgba(34,197,94,0.15);  color: var(--good); }
+.minor .status-badge { background: rgba(245,158,11,0.15); color: var(--warn); }
+.bad   .status-badge { background: rgba(239,68,68,0.15);  color: var(--bad); }
+.card-reason { font-size: 0.78rem; color: var(--muted); line-height: 1.5; margin-top: 0.1rem; }
+.meta { margin-top: 0.8rem; font-family: 'Space Mono', monospace; font-size: 0.6rem; color: var(--muted); text-align: right; }
+.spinner { display: inline-block; width: 13px; height: 13px; border: 2px solid rgba(255,255,255,0.25); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 5px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.empty-state { text-align: center; padding: 1.5rem; color: var(--muted); font-size: 0.88rem; }
+</style>
 </head>
 <body data-theme="dark">
 <div class="container">
+
   <header>
     <div>
-      <div class="eyebrow">TfL LIVE STATUS</div>
+      <div class="eyebrow">TfL Live Status</div>
       <h1>Commute</h1>
     </div>
     <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()">☀️</div>
@@ -74,51 +236,54 @@
     <button class="tab" onclick="switchTab('times', this)">⏰ Times</button>
   </div>
 
+  <!-- LINES -->
   <div id="panel-lines" class="panel active">
     <div class="section-card">
-      <h2>Select your lines</h2>
+      <div class="section-label">Select your lines</div>
       <div class="line-grid" id="lineGrid"></div>
     </div>
   </div>
 
+  <!-- STATIONS -->
   <div id="panel-stations" class="panel">
     <div class="section-card">
-      <h2>Search stations</h2>
-      <div class="search-row">
-        <input type="text" id="stationSearch" class="search-input" placeholder="e.g. Kings Cross, Vauxhall…" oninput="onStationSearch()" autocomplete="off">
-      </div>
+      <div class="section-label">Search stations</div>
+      <input type="text" id="stationSearch" class="search-input" placeholder="e.g. Kings Cross, Vauxhall…" oninput="onStationSearch()" autocomplete="off">
       <div id="searchResults" class="search-results"></div>
-      <h2 style="margin-top:0.4rem">Saved stations</h2>
-      <div id="savedStations" class="saved-stations"><div class="empty-stations">No stations saved yet</div></div>
+      <div class="section-label" style="margin-top:0.2rem">Saved stations</div>
+      <div id="savedStations" class="saved-stations">
+        <div class="empty-stations">No stations saved yet — search above</div>
+      </div>
     </div>
   </div>
 
+  <!-- TIMES -->
   <div id="panel-times" class="panel">
     <div class="section-card">
-      <h2>Alert windows</h2>
+      <div class="section-label">Alert windows</div>
       <div class="time-windows" id="timeWindows"></div>
       <button class="add-time-btn" onclick="addTimeWindow()">＋ Add time window</button>
     </div>
     <div class="section-card">
-      <h2>Notifications</h2>
+      <div class="section-label">Notifications</div>
       <div class="notif-row">
-        <span>Enable alerts</span>
+        <span class="notif-label">Enable alerts</span>
         <label class="toggle"><input type="checkbox" id="notifToggle" onchange="toggleNotifications()"><span class="toggle-slider"></span></label>
       </div>
-      <p class="notif-note">When enabled, the app will check during your alert windows and notify you of disruptions. Keep this page open.</p>
+      <p class="notif-note">When enabled, the app checks your saved lines and stations during alert windows and sends a notification if there's a disruption. Keep this page open.</p>
     </div>
   </div>
 
   <button class="check-btn" id="checkBtn" onclick="checkStatus()">Check Commute</button>
-  <button class="check-btn" style="background:#22c55e; margin-top: 0.6rem;" onclick="testFullNotification()">🧪 Test Real Notification</button>
+  <button class="check-btn" style="background:#22c55e; margin-top:0.6rem;" onclick="testFullNotification()">🧪 Test Real Notification</button>
 
   <div id="resultsSection" class="results-section" style="display:none">
     <div class="results-header" id="resultsHeader"></div>
     <div id="results" class="results"></div>
     <div class="meta" id="meta"></div>
   </div>
-</div>
 
+</div>
 <script>
 const LINES = [
   { id: 'bakerloo', name: 'Bakerloo', color: '#B36305' },
@@ -136,7 +301,6 @@ const LINES = [
   { id: 'victoria', name: 'Victoria', color: '#0098D4' },
   { id: 'waterloo-city', name: 'Waterloo & City', color: '#95CDBA' },
 ];
-
 const ALL_STATIONS = [
   { id: '940GZZLUASL', name: "Angel", lines: ["Northern"] },
   { id: '940GZZLUBBN', name: "Barbican", lines: ["Circle","Hammersmith & City","Metropolitan"] },
@@ -235,17 +399,12 @@ function save() {
     localStorage.setItem('mc_notif', notifEnabled ? '1' : '0');
   } catch(e) {}
 }
-
 function load() {
   try {
-    const l = localStorage.getItem('mc_lines');
-    if (l) JSON.parse(l).forEach(x => selectedLines.add(x));
-    const s = localStorage.getItem('mc_stations');
-    if (s) savedStations = JSON.parse(s);
-    const t = localStorage.getItem('mc_times');
-    if (t) timeWindows = JSON.parse(t);
-    const n = localStorage.getItem('mc_notif');
-    if (n) notifEnabled = n === '1';
+    const l = localStorage.getItem('mc_lines'); if (l) JSON.parse(l).forEach(x => selectedLines.add(x));
+    const s = localStorage.getItem('mc_stations'); if (s) savedStations = JSON.parse(s);
+    const t = localStorage.getItem('mc_times'); if (t) timeWindows = JSON.parse(t);
+    const n = localStorage.getItem('mc_notif'); if (n) notifEnabled = n === '1';
   } catch(e) {}
 }
 
@@ -253,21 +412,13 @@ function toggleTheme() {
   const body = document.body;
   const toggle = document.getElementById('themeToggle');
   if (body.getAttribute('data-theme') === 'dark') {
-    body.setAttribute('data-theme', 'light');
-    toggle.textContent = '🌙';
-    localStorage.setItem('theme', 'light');
+    body.setAttribute('data-theme', 'light'); toggle.textContent = '🌙'; localStorage.setItem('theme', 'light');
   } else {
-    body.setAttribute('data-theme', 'dark');
-    toggle.textContent = '☀️';
-    localStorage.setItem('theme', 'dark');
+    body.setAttribute('data-theme', 'dark'); toggle.textContent = '☀️'; localStorage.setItem('theme', 'dark');
   }
 }
-
 const savedTheme = localStorage.getItem('theme');
-if (savedTheme) {
-  document.body.setAttribute('data-theme', savedTheme);
-  document.getElementById('themeToggle').textContent = savedTheme === 'light' ? '🌙' : '☀️';
-}
+if (savedTheme) { document.body.setAttribute('data-theme', savedTheme); document.getElementById('themeToggle').textContent = savedTheme === 'light' ? '🌙' : '☀️'; }
 
 function switchTab(name, btn) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -288,7 +439,6 @@ function buildLineGrid() {
     grid.appendChild(btn);
   });
 }
-
 function toggleLine(id, btn) {
   if (selectedLines.has(id)) { selectedLines.delete(id); btn.classList.remove('selected'); }
   else { selectedLines.add(id); btn.classList.add('selected'); }
@@ -300,189 +450,187 @@ function onStationSearch() {
   const box = document.getElementById('searchResults');
   if (q.length < 2) { box.classList.remove('show'); box.innerHTML = ''; return; }
   const matches = ALL_STATIONS.filter(s => s.name.toLowerCase().includes(q)).slice(0, 8);
-  if (!matches.length) { box.innerHTML = '<div class="search-result-item" style="color:var(--muted)">No stations found</div>'; box.classList.add('show'); return; }
-  box.innerHTML = matches.map(s => `<div class="search-result-item" onclick="addStation('${s.id}','${s.name.replace(/'/g,"\\'")}','${s.lines.join(",")}')"><div>${s.name}</div><div class="result-line">${s.lines.join(' · ')}</div></div>`).join('');
+  if (!matches.length) { box.innerHTML = '<div class="search-result-item"><div class="result-name" style="color:var(--muted)">No stations found</div></div>'; box.classList.add('show'); return; }
+  box.innerHTML = matches.map(s => `<div class="search-result-item" onclick="addStation('${s.id}','${s.name.replace(/'/g,"\\'")}','${s.lines.join(",")}')"><div class="result-name">${s.name}</div><div class="result-lines-tag">${s.lines.join(' · ')}</div></div>`).join('');
   box.classList.add('show');
 }
-
 function addStation(id, name, linesStr) {
   if (savedStations.find(s => s.id === id)) { closeSearch(); return; }
   savedStations.push({ id, name, lines: linesStr.split(',') });
   save(); renderSavedStations(); closeSearch();
 }
-
 function closeSearch() {
   document.getElementById('stationSearch').value = '';
   document.getElementById('searchResults').classList.remove('show');
   document.getElementById('searchResults').innerHTML = '';
 }
-
-function removeStation(id) {
-  savedStations = savedStations.filter(s => s.id !== id);
-  save(); renderSavedStations();
-}
-
+function removeStation(id) { savedStations = savedStations.filter(s => s.id !== id); save(); renderSavedStations(); }
 function renderSavedStations() {
   const el = document.getElementById('savedStations');
-  if (!savedStations.length) { 
-    el.innerHTML = '<div class="empty-stations">No stations saved yet — search above</div>'; 
-    return; 
-  }
+  if (!savedStations.length) { el.innerHTML = '<div class="empty-stations">No stations saved yet — search above</div>'; return; }
   el.innerHTML = savedStations.map(s => `
-    <div class="saved-station">
-      <div><div class="saved-station-name">${s.name}</div></div>
-      <button class="remove-btn" onclick="removeStation('${s.id}')">×</button>
-    </div>
-  `).join('');
+    <div class="saved-station-chip">
+      <div class="chip-left">
+        <div class="chip-name">${s.name}</div>
+        <div class="chip-lines">${s.lines.join(' · ')}</div>
+      </div>
+      <button class="chip-remove" onclick="removeStation('${s.id}')" title="Remove">×</button>
+    </div>`).join('');
 }
 
 function addTimeWindow(fw) {
   const w = fw || { fromH: 7, fromM: 0, toH: 9, toM: 30 };
-  timeWindows.push(w);
-  save(); renderTimeWindows();
+  timeWindows.push(w); save(); renderTimeWindows();
 }
-
-function removeTimeWindow(i) {
-  timeWindows.splice(i, 1);
-  save(); renderTimeWindows();
-}
-
+function removeTimeWindow(i) { timeWindows.splice(i, 1); save(); renderTimeWindows(); }
 function renderTimeWindows() {
   const el = document.getElementById('timeWindows');
   if (!timeWindows.length) { el.innerHTML = ''; return; }
-  el.innerHTML = timeWindows.map((w, i) => `<div class="time-window-row"><span class="time-label">from</span><div class="time-picker">${makeHSelect(w.fromH, i, 'fromH')}<span class="time-sep">:</span>${makeMSelect(w.fromM, i, 'fromM')}</div><span class="time-arrow">→</span><div class="time-picker">${makeHSelect(w.toH, i, 'toH')}<span class="time-sep">:</span>${makeMSelect(w.toM, i, 'toM')}</div>${timeWindows.length > 1 ? `<button class="remove-time-btn" onclick="removeTimeWindow(${i})">×</button>` : ''}</div>`).join('');
+  el.innerHTML = timeWindows.map((w, i) => `
+    <div class="time-window-row">
+      <div class="tw-inner">
+        <span class="tw-label">from</span>
+        <div class="tw-picker">${makeHSelect(w.fromH,i,'fromH')}<span class="tw-sep">:</span>${makeMSelect(w.fromM,i,'fromM')}</div>
+        <span class="tw-arrow">→</span>
+        <div class="tw-picker">${makeHSelect(w.toH,i,'toH')}<span class="tw-sep">:</span>${makeMSelect(w.toM,i,'toM')}</div>
+      </div>
+      ${timeWindows.length > 1 ? `<button class="tw-remove" onclick="removeTimeWindow(${i})">×</button>` : ''}
+    </div>`).join('');
 }
-
 function makeHSelect(val, idx, field) {
   let o = '';
   for (let h=0;h<=23;h++) o+=`<option value="${h}" ${h==val?'selected':''}>${String(h).padStart(2,'0')}</option>`;
   return `<select onchange="updateTW(${idx},'${field}',this.value)">${o}</select>`;
 }
-
 function makeMSelect(val, idx, field) {
   let o = '';
   for (let m=0;m<=55;m+=5) o+=`<option value="${m}" ${m==val?'selected':''}>${String(m).padStart(2,'0')}</option>`;
   return `<select onchange="updateTW(${idx},'${field}',this.value)">${o}</select>`;
 }
-
 function updateTW(idx, field, val) { timeWindows[idx][field] = parseInt(val); save(); }
 
 function toggleNotifications() {
-  notifEnabled = document.getElementById('notifToggle').checked;
-  save();
+  notifEnabled = document.getElementById('notifToggle').checked; save();
   if (notifEnabled) {
     if ('Notification' in window && Notification.permission !== 'granted') {
       Notification.requestPermission().then(p => {
-        if (p !== 'granted') { showNotifAlert('⚠️ Notifications blocked.'); }
-        else { showNotifAlert('✅ <strong>Alerts enabled!</strong>'); startPolling(); }
+        if (p !== 'granted') showNotifAlert('⚠️ Notifications blocked. You can still use the manual check button.');
+        else { showNotifAlert('✅ <strong>Alerts enabled!</strong> Keep this page open.'); startPolling(); }
       });
-    } else {
-      showNotifAlert('✅ <strong>Alerts enabled!</strong>');
-      startPolling();
-    }
-  } else {
-    stopPolling();
-    document.getElementById('notifAlert').classList.remove('show');
-  }
+    } else { showNotifAlert('✅ <strong>Alerts enabled!</strong> Keep this page open.'); startPolling(); }
+  } else { stopPolling(); document.getElementById('notifAlert').classList.remove('show'); }
 }
-
-function showNotifAlert(msg) {
-  const el = document.getElementById('notifAlert');
-  el.innerHTML = msg; el.classList.add('show');
-}
-
+function showNotifAlert(msg) { const el = document.getElementById('notifAlert'); el.innerHTML = msg; el.classList.add('show'); }
 function isInWindow() {
   if (!timeWindows.length) return false;
-  const now = new Date();
-  const nowMins = now.getHours() * 60 + now.getMinutes();
+  const now = new Date(), nowMins = now.getHours()*60+now.getMinutes();
   return timeWindows.some(w => nowMins >= (w.fromH*60+w.fromM) && nowMins <= (w.toH*60+w.toM));
 }
-
-function startPolling() {
-  stopPolling();
-  notifInterval = setInterval(async () => { if (!isInWindow()) return; await checkStatus(true); }, 5*60*1000);
-}
-
+function startPolling() { stopPolling(); notifInterval = setInterval(async () => { if (!isInWindow()) return; await checkStatus(true); }, 5*60*1000); }
 function stopPolling() { if (notifInterval) clearInterval(notifInterval); notifInterval = null; }
 
-async function checkStatus(silent = false) {
-  const hasLines = selectedLines.size > 0;
-  const hasStations = savedStations.length > 0;
-  if (!hasLines && !hasStations) { if (!silent) alert('Please select at least one line or station first.'); return; }
-
-  const btn = document.getElementById('checkBtn');
-  if (!silent) { btn.disabled = true; btn.innerHTML = 'Checking…'; }
-
-  try {
-    if (!silent) {
-      document.getElementById('resultsSection').style.display = 'block';
-    }
-  } catch(e) {}
-  finally {
-    if (!silent) { btn.disabled = false; btn.textContent = 'Check Commute'; }
-  }
+function severityClass(desc) {
+  if (!desc) return 'good';
+  const d = desc.toLowerCase();
+  if (d.includes('good service') || d.includes('special service')) return 'good';
+  if (d.includes('minor delay') || d.includes('reduced service') || d.includes('part suspension') || d.includes('part closure') || d.includes('planned closure')) return 'minor';
+  return 'bad';
 }
 
-async function testFullNotification() {
-  if (!('Notification' in window) || Notification.permission !== 'granted') {
-    alert("Please enable notifications first");
-    return;
-  }
-
-  showNotifAlert('🔍 Checking status...');
-  
+async function checkStatus(silent = false) {
+  const hasLines = selectedLines.size > 0, hasStations = savedStations.length > 0;
+  if (!hasLines && !hasStations) { if (!silent) alert('Please select at least one line or station first.'); return; }
+  const btn = document.getElementById('checkBtn');
+  if (!silent) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Checking…'; }
+  const resultsEl = document.getElementById('results');
+  const section = document.getElementById('resultsSection');
+  if (!silent) { resultsEl.innerHTML = ''; section.style.display = 'none'; }
+  const allResults = [];
+  const inWindow = isInWindow();
   try {
-    const hasLines = selectedLines.size > 0;
-    const hasStations = savedStations.length > 0;
-    
-    if (!hasLines && !hasStations) {
-      new Notification('Commute', { body: 'Please select lines or stations first.' });
-      return;
-    }
-
-    let body = "";
-
     if (hasLines) {
       const ids = [...selectedLines].join(',');
       const res = await fetch(`https://api.tfl.gov.uk/Line/${encodeURIComponent(ids)}/Status`);
       if (res.ok) {
         const data = await res.json();
         data.forEach(line => {
-          const status = line.lineStatuses?.[0]?.statusSeverityDescription || 'Unknown';
-          body += `• ${line.name}: ${status}\n`;
+          const lineInfo = LINES.find(l => l.id === line.id) || {};
+          const statusObj = line.lineStatuses?.[0] || {};
+          const statusText = statusObj.statusSeverityDescription || 'Unknown';
+          const reason = (statusObj.reason || '').replace(/^[^:]+:\s*/i, '');
+          allResults.push({ name: line.name, type: 'line', color: lineInfo.color || '#888', statusText, reason, cls: severityClass(statusText) });
         });
       }
     }
-
     if (hasStations) {
-      body += "\nStations:\n";
-      let hasDisruption = false;
       for (const station of savedStations) {
         try {
           const res = await fetch(`https://api.tfl.gov.uk/StopPoint/${station.id}/Disruption`);
           if (res.ok) {
-            const disruptions = await res.json();
-            if (disruptions.length > 0) {
-              const desc = disruptions[0].categoryDescription || "Disruption";
-              body += `• ${station.name}: ${desc}\n`;
-              hasDisruption = true;
+            const data = await res.json();
+            if (data.length > 0) {
+              allResults.push({ name: station.name, type: 'station', color: '#7c6af7', statusText: data[0].categoryDescription || 'Disruption', reason: data[0].description || '', cls: 'bad' });
+            } else {
+              allResults.push({ name: station.name, type: 'station', color: '#7c6af7', statusText: 'No disruptions', reason: '', cls: 'good' });
             }
           }
+        } catch(e) { allResults.push({ name: station.name, type: 'station', color: '#7c6af7', statusText: 'Check failed', reason: '', cls: 'minor' }); }
+      }
+    }
+    if (silent && notifEnabled && inWindow) {
+      const problems = allResults.filter(r => r.cls !== 'good');
+      if (problems.length && 'Notification' in window && Notification.permission === 'granted') {
+        new Notification('⚠️ Commute Alert', { body: problems.map(p => `${p.name}: ${p.statusText}`).join('\n'), icon: 'https://via.placeholder.com/192/7c6af7/ffffff?text=C' });
+      }
+      return;
+    }
+    if (!silent) {
+      const container = document.createElement('div');
+      container.className = 'results';
+      allResults.forEach((r, i) => {
+        const card = document.createElement('div');
+        card.className = `status-card ${r.cls}`;
+        card.style.animationDelay = `${i*0.05}s`;
+        card.innerHTML = `<div class="card-bar" style="background:${r.color}"></div><div class="card-body"><div class="card-header"><div><div class="card-name">${r.name}</div><div class="card-type">${r.type}</div></div><span class="status-badge">${r.statusText}</span></div>${r.reason?`<div class="card-reason">${r.reason}</div>`:''}</div>`;
+        container.appendChild(card);
+      });
+      resultsEl.innerHTML = ''; resultsEl.appendChild(container);
+      document.getElementById('resultsHeader').textContent = `${allResults.length} result${allResults.length!==1?'s':''}`;
+      document.getElementById('meta').textContent = `Last checked ${new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})} · Live TfL data`;
+      section.style.display = 'block';
+    }
+  } catch(err) {
+    if (!silent) { resultsEl.innerHTML = `<div class="empty-state">⚠️ Couldn't reach TfL API.<br><small>${err.message}</small></div>`; section.style.display = 'block'; }
+  } finally {
+    if (!silent) { btn.disabled = false; btn.textContent = 'Check Commute'; }
+  }
+}
+
+async function testFullNotification() {
+  if (!('Notification' in window) || Notification.permission !== 'granted') { alert("Please enable notifications first in the Times tab."); return; }
+  showNotifAlert('🔍 Checking status…');
+  try {
+    const hasLines = selectedLines.size > 0, hasStations = savedStations.length > 0;
+    if (!hasLines && !hasStations) { new Notification('Commute', { body: 'Please select lines or stations first.' }); return; }
+    let body = "";
+    if (hasLines) {
+      const ids = [...selectedLines].join(',');
+      const res = await fetch(`https://api.tfl.gov.uk/Line/${encodeURIComponent(ids)}/Status`);
+      if (res.ok) { const data = await res.json(); data.forEach(line => { const status = line.lineStatuses?.[0]?.statusSeverityDescription || 'Unknown'; body += `• ${line.name}: ${status}\n`; }); }
+    }
+    if (hasStations) {
+      body += "\nStations:\n"; let hasDisruption = false;
+      for (const station of savedStations) {
+        try {
+          const res = await fetch(`https://api.tfl.gov.uk/StopPoint/${station.id}/Disruption`);
+          if (res.ok) { const d = await res.json(); if (d.length > 0) { body += `• ${station.name}: ${d[0].categoryDescription || "Disruption"}\n`; hasDisruption = true; } }
         } catch(e) {}
       }
       if (!hasDisruption) body += "• No closures or disruptions\n";
     }
-
-    new Notification('Commute', {
-      body: body.trim(),
-      icon: 'https://via.placeholder.com/192/7c6af7/ffffff?text=C'
-    });
-
+    new Notification('Commute', { body: body.trim(), icon: 'https://via.placeholder.com/192/7c6af7/ffffff?text=C' });
     showNotifAlert('✅ Notification sent!');
-
-  } catch (err) {
-    new Notification('Commute', { body: 'Could not fetch live data.' });
-  }
+  } catch(err) { new Notification('Commute', { body: 'Could not fetch live data.' }); }
 }
 
 load();
